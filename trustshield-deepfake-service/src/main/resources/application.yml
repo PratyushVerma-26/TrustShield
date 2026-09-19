@@ -1,0 +1,55 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: trustshield-deepfake-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # H2 in-memory by default: zero external dependencies, immediate startup.
+  datasource:
+    url: jdbc:h2:mem:trustshield_deepfake;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  deepfake:
+    forensics:
+      # Quality parameter used for Error Level Analysis re-encoding (0.0 to 1.0)
+      ela-quality: 0.90
+      # Block-wise ELA variance threshold above which localized splicing is suspected
+      ela-variance-threshold: 120.0
+      # Threshold for spatial 8x8 blockiness periodicity proxy
+      blockiness-periodicity-threshold: 0.70
+      # Threshold for Laplacian high-pass noise residual variance
+      noise-residual-variance-threshold: 85.0
+      # Threshold below which an image is flagged as unnaturally smooth (e.g. AI-generated diffusion)
+      noise-hyper-smooth-threshold: 1.5
+      # Max dimension allowed to prevent memory exhaustion in in-memory pixel arrays
+      max-image-dimension: 4096
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

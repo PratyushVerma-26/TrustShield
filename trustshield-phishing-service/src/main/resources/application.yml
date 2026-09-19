@@ -1,0 +1,89 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: trustshield-phishing-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # H2 in-memory by default: the service must start with no external
+  # dependencies so a demo cannot fail on a cold database container.
+  datasource:
+    url: jdbc:h2:mem:trustshield_phishing;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  phishing:
+    model-path: classpath:models/phishing_model.json
+
+    # Blacklist hits can only RAISE the score, never lower it. Rationale in
+    # UrlScanService: blacklists are high-precision / low-recall, so absence of
+    # a hit is not evidence of safety.
+    blacklist-confirmed-floor: 90
+
+    # External enrichment is best-effort. If a call exceeds this budget it is
+    # abandoned and the verdict is returned from the local model alone. This
+    # bounds the enrichment step at 1200 ms; it is a configured ceiling, not a
+    # measured end-to-end latency, and no latency benchmark has been run.
+    enrichment-timeout-ms: 1200
+
+    reputation:
+      google-safe-browsing:
+        enabled: ${GOOGLE_SAFEBROWSING_ENABLED:${GOOGLE_SAFE_BROWSING_ENABLED:true}}
+        api-key: ${GOOGLE_SAFEBROWSING_KEY:${GOOGLE_SAFE_BROWSING_KEY:}}
+      virustotal:
+        enabled: ${VIRUSTOTAL_ENABLED:true}
+        api-key: ${VIRUSTOTAL_API_KEY:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.trustshield: INFO
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+---
+# PostgreSQL profile: mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:trustshield}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:trustshield_user}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  h2:
+    console:
+      enabled: false

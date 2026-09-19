@@ -1,0 +1,88 @@
+{
+  "_comment": [
+    "PHISHING MODEL WEIGHTS - HEURISTIC BOOTSTRAP, NOT A TRAINED MODEL.",
+    "",
+    "These coefficients were hand-initialised so the service is runnable before a",
+    "training run has happened. The signs reflect directions established in the",
+    "literature (Ma et al. KDD 2009; Sahoo et al. 2017) but the magnitudes are NOT",
+    "fitted to data and the output is NOT probability-calibrated - it saturates",
+    "towards 0 and 1 more readily than a trained model would.",
+    "",
+    "DO NOT REPORT ACCURACY, PRECISION, RECALL OR F1 FROM THIS FILE. Any metric",
+    "quoted in the project report must come from a genuine training run.",
+    "",
+    "Replace by running:  python scripts/train_phishing_model.py --data data/urls.csv",
+    "That script overwrites this file with provenance set to TRAINED and fills in",
+    "the metrics block from a held-out test split.",
+    "",
+    "featureNames order is contractual and is validated at startup against",
+    "UrlFeatureExtractor.FEATURE_NAMES. Do not reorder by hand."
+  ],
+
+  "version": "0.1.0-bootstrap",
+  "provenance": "HEURISTIC_BOOTSTRAP",
+  "modelType": "logistic_regression",
+  "standardisation": "z-score",
+  "trainedOn": null,
+  "trainingRows": 0,
+
+  "featureNames": [
+    "url_length",
+    "host_length",
+    "path_length",
+    "query_length",
+    "num_dots_in_host",
+    "num_hyphens_in_host",
+    "num_subdomains",
+    "num_digits_in_host",
+    "digit_ratio_in_host",
+    "host_entropy",
+    "is_ip_literal",
+    "is_punycode",
+    "has_at_symbol",
+    "has_double_slash_in_path",
+    "is_https",
+    "has_explicit_port",
+    "num_path_segments",
+    "num_query_params",
+    "num_encoded_chars",
+    "num_sensitive_keywords",
+    "brand_impersonation",
+    "suspicious_tld",
+    "is_shortener",
+    "longest_host_token_len",
+    "num_hyphens_in_url",
+    "has_suspicious_extension"
+  ],
+
+  "mean": [
+    55.0, 20.0, 25.0, 8.0, 2.2, 0.4, 1.2, 0.7, 0.035, 3.3,
+    0.02, 0.005, 0.01, 0.02, 0.62, 0.02, 2.0, 0.5, 0.3, 0.5,
+    0.03, 0.08, 0.02, 9.0, 0.6, 0.01
+  ],
+
+  "scale": [
+    35.0, 10.0, 28.0, 25.0, 1.0, 0.9, 1.0, 2.0, 0.09, 0.5,
+    0.14, 0.07, 0.10, 0.14, 0.49, 0.14, 1.8, 1.2, 1.5, 1.1,
+    0.17, 0.27, 0.14, 4.0, 1.3, 0.10
+  ],
+
+  "coefficients": [
+    0.35, 0.20, 0.15, 0.10, 0.30, 0.35, 0.25, 0.30, 0.25, 0.30,
+    0.85, 0.70, 0.75, 0.40, -0.35, 0.45, 0.10, 0.08, 0.30, 0.45,
+    0.90, 0.80, 0.50, 0.20, 0.25, 0.65
+  ],
+
+  "intercept": -1.10,
+
+  "metrics": {
+    "_note": "Empty by design. A bootstrap model has no measured performance.",
+    "accuracy": null,
+    "precision": null,
+    "recall": null,
+    "f1": null,
+    "rocAuc": null,
+    "testSetSize": null,
+    "falsePositiveRate": null
+  }
+}

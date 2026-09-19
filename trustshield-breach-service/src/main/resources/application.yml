@@ -1,0 +1,92 @@
+server:
+  port: 8084          # 8083 belongs to the phishing service; both can run at once
+
+spring:
+  application:
+    name: trustshield-breach-service
+
+  # H2 in-memory by default: the service must start with no external
+  # dependencies so a demo cannot fail on a cold database container.
+  datasource:
+    url: jdbc:h2:mem:trustshield_breach;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  breach:
+    # Bundled list of well-known weak passwords. Always consulted, so the demo
+    # produces a real EXPOSED verdict with no network and no API key. A MISS from
+    # this source reports UNAVAILABLE rather than NOT_FOUND, because a list this
+    # short cannot make absence meaningful — see CommonPasswordCatalog.
+    offline-catalog-path: classpath:breach/common-passwords.txt
+
+    # Wall-clock budget covering ALL outbound lookups for one request, not each.
+    lookup-timeout-ms: 1500
+
+    pwned-passwords:
+      # k-anonymous and needs no API key, but it does need connectivity, so it is
+      # off by default and the offline catalog answers instead. Turn it on to
+      # demonstrate the range protocol against the real corpus.
+      enabled: false
+      base-url: https://api.pwnedpasswords.com
+      # Pads every response to a uniform size so an observer cannot infer the
+      # queried prefix from response length. There is no reason to disable this.
+      add-padding: true
+
+    hibp-account:
+      # NOT k-anonymous: transmits the full email address, and needs a paid key.
+      # Off by default so a demo cannot silently exfiltrate an address.
+      enabled: false
+      api-key: ${HIBP_API_KEY:}
+      base-url: https://haveibeenpwned.com/api/v3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.trustshield: INFO
+    # DEBUG here logs bucket prefixes only, never full hashes or passwords.
+    com.trustshield.breach.hibp: INFO
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+---
+# PostgreSQL profile: mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:trustshield}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:trustshield_user}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  h2:
+    console:
+      enabled: false

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "CLM-001",
+    "claim": "UNESCO declares Indian national anthem Jana Gana Mana as best national anthem in the world",
+    "claimant": "Viral WhatsApp Forward",
+    "debunkTitle": "No, UNESCO did not declare India's national anthem as the best in the world",
+    "debunkSource": "Alt News",
+    "debunkUrl": "https://www.altnews.in/unesco-declares-jana-gana-mana-best-anthem-hoax/",
+    "category": "viral_forward"
+  },
+  {
+    "id": "CLM-002",
+    "claim": "Government of India giving free laptops to all students under Prime Minister Free Laptop Scheme click link to apply",
+    "claimant": "Phishing & Fake Scheme Message",
+    "debunkTitle": "PIB Fact Check: Government of India is not running any such Free Laptop Scheme",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/free-laptop-scheme-hoax",
+    "category": "financial_scam"
+  },
+  {
+    "id": "CLM-003",
+    "claim": "5G mobile radiation waves cause coronavirus infection and oxygen depletion in atmosphere",
+    "claimant": "Conspiracy Social Media Posts",
+    "debunkTitle": "Fact Check: 5G technology does not spread virus or cause respiratory distress",
+    "debunkSource": "Reuters Fact Check",
+    "debunkUrl": "https://www.reuters.com/article/factcheck-5g-health-idUSL1N2P118X",
+    "category": "health_conspiracy"
+  },
+  {
+    "id": "CLM-004",
+    "claim": "Drinking hot water with lemon and baking soda immediately cures cancer and kills virus",
+    "claimant": "Alternative Health Blogs",
+    "debunkTitle": "Baking soda and hot lemon water do not cure cancer or eliminate viral pathogens",
+    "debunkSource": "Snopes",
+    "debunkUrl": "https://www.snopes.com/fact-check/lemon-baking-soda-cancer-cure/",
+    "category": "health_misinformation"
+  },
+  {
+    "id": "CLM-005",
+    "claim": "Entering your ATM PIN in reverse automatically alerts the police and calls nearest patrol van",
+    "claimant": "Urban Legend Forward",
+    "debunkTitle": "Reverse PIN at ATM does not alert police or dispatch emergency services",
+    "debunkSource": "Snopes",
+    "debunkUrl": "https://www.snopes.com/fact-check/reverse-pin-atm-police/",
+    "category": "urban_legend"
+  },
+  {
+    "id": "CLM-006",
+    "claim": "Reserve Bank of India issuing new 1000 rupee notes and withdrawing 500 rupee notes from next month",
+    "claimant": "Viral Audio & Forwarded Notice",
+    "debunkTitle": "RBI clarification: No new 1000 rupee banknotes being introduced; 500 notes remain legal tender",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/rbi-currency-notice-fake",
+    "category": "financial_rumor"
+  },
+  {
+    "id": "CLM-007",
+    "claim": "NASA satellite photo of India during Diwali shows country completely illuminated from space",
+    "claimant": "Social Media Image Post",
+    "debunkTitle": "Composite visualization of population growth falsely labeled as NASA Diwali photograph",
+    "debunkSource": "Boom Live",
+    "debunkUrl": "https://www.boomlive.in/nasa-satellite-image-india-diwali-fact-check",
+    "category": "manipulated_media"
+  },
+  {
+    "id": "CLM-008",
+    "claim": "Government is providing 3 months free internet recharge to all mobile users under new digital scheme",
+    "claimant": "WhatsApp Forward with Phishing Link",
+    "debunkTitle": "Telecom regulatory authority warns against fraudulent free recharge links",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/free-mobile-recharge-scam",
+    "category": "phishing_lure"
+  },
+  {
+    "id": "CLM-009",
+    "claim": "Holding your breath for 10 seconds without coughing is a definitive medical test for infection",
+    "claimant": "Medical Advice Forward",
+    "debunkTitle": "Breath-holding test is medically unproven and cannot diagnose respiratory infections",
+    "debunkSource": "World Health Organization",
+    "debunkUrl": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters",
+    "category": "health_misinformation"
+  },
+  {
+    "id": "CLM-010",
+    "claim": "WhatsApp calls and messages will be recorded and marked with three blue ticks under new cyber rules",
+    "claimant": "Security Panic Forward",
+    "debunkTitle": "WhatsApp messages remain end-to-end encrypted; three blue ticks claim is completely fabricated",
+    "debunkSource": "Alt News",
+    "debunkUrl": "https://www.altnews.in/whatsapp-recording-three-blue-ticks-hoax/",
+    "category": "privacy_panic"
+  },
+  {
+    "id": "CLM-011",
+    "claim": "Click here to claim your income tax refund of 25000 directly into your bank account",
+    "claimant": "SMS Phishing Scam",
+    "debunkTitle": "Income Tax Department warning: Do not click on unofficial refund links or share credentials",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/income-tax-refund-sms-fraud",
+    "category": "financial_scam"
+  },
+  {
+    "id": "CLM-012",
+    "claim": "Secret cure for diabetes discovered by doctors who are now being silenced by big pharmaceutical companies",
+    "claimant": "Sponsored Clickbait Ads",
+    "debunkTitle": "No secret cure for diabetes is being suppressed; beware of unregulated herbal supplements",
+    "debunkSource": "Factly",
+    "debunkUrl": "https://factly.in/fake-diabetes-cure-ad-debunked/",
+    "category": "health_scam"
+  },
+  {
+    "id": "CLM-013",
+    "claim": "Bill Gates admits vaccines contain microchips to monitor global human population",
+    "claimant": "Conspiracy Forum",
+    "debunkTitle": "False: Bill Gates never stated vaccines contain injectable microchips or tracking devices",
+    "debunkSource": "Reuters Fact Check",
+    "debunkUrl": "https://www.reuters.com/article/factcheck-gates-vaccine-microchip-idUSL1N2MC18R",
+    "category": "health_conspiracy"
+  },
+  {
+    "id": "CLM-014",
+    "claim": "All bank accounts without PAN card link will be frozen permanently from tomorrow midnight",
+    "claimant": "Viral WhatsApp Panic",
+    "debunkTitle": "Banks clarify that regulatory deadlines do not involve immediate midnight freezing without notice",
+    "debunkSource": "Boom Live",
+    "debunkUrl": "https://www.boomlive.in/pan-card-bank-account-frozen-rumor/",
+    "category": "panic_forward"
+  },
+  {
+    "id": "CLM-015",
+    "claim": "Eating raw garlic and onion prevents virus infection completely according to new laboratory study",
+    "claimant": "Dietary Advice Chain",
+    "debunkTitle": "While nutritious, garlic and onions do not provide immunity against infectious viral disease",
+    "debunkSource": "World Health Organization",
+    "debunkUrl": "https://www.who.int/mythbusters/garlic-infection-prevention",
+    "category": "health_misinformation"
+  },
+  {
+    "id": "CLM-016",
+    "claim": "New law allows police to seize smartphones without a warrant if political messages are forwarded",
+    "claimant": "Civil Liberties Rumor",
+    "debunkTitle": "No legislation permits warrantless seizure of personal devices for generic message forwarding",
+    "debunkSource": "Alt News",
+    "debunkUrl": "https://www.altnews.in/police-phone-seizure-forwarding-fake-news/",
+    "category": "legal_rumor"
+  },
+  {
+    "id": "CLM-017",
+    "claim": "Government announces free solar panel rooftop scheme with immediate cash subsidy on registration link",
+    "claimant": "Fraudulent Web Portal",
+    "debunkTitle": "Ministry of New and Renewable Energy cautions public against unauthorized solar scheme websites",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/solar-rooftop-subsidy-fraud",
+    "category": "financial_scam"
+  },
+  {
+    "id": "CLM-018",
+    "claim": "Supreme Court orders immediate ban on all cryptocurrency transactions and arrest of account holders",
+    "claimant": "Crypto Trading Forum Rumor",
+    "debunkTitle": "No such directive issued by the Supreme Court; crypto regulatory framework remains under review",
+    "debunkSource": "Factly",
+    "debunkUrl": "https://factly.in/crypto-ban-supreme-court-rumor/",
+    "category": "financial_rumor"
+  },
+  {
+    "id": "CLM-019",
+    "claim": "Drinking colloidal silver destroys all known pathogens and cures serious bacterial infections permanently",
+    "claimant": "Naturopathy Forum",
+    "debunkTitle": "FDA warns that colloidal silver is unsafe and ineffective for treating any health condition",
+    "debunkSource": "FDA Consumer Updates",
+    "debunkUrl": "https://www.fda.gov/consumers/consumer-updates/colloidal-silver-risk",
+    "category": "health_misinformation"
+  },
+  {
+    "id": "CLM-020",
+    "claim": "Ministry of Railways offering free lifetime train passes for senior citizens through unofficial website",
+    "claimant": "Senior Citizen WhatsApp Groups",
+    "debunkTitle": "Indian Railways clarifies no free lifetime travel passes are being issued via third-party websites",
+    "debunkSource": "PIB Fact Check",
+    "debunkUrl": "https://factcheck.pib.gov.in/railway-free-pass-scheme-fake",
+    "category": "phishing_lure"
+  }
+]

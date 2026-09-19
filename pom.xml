@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.2</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.trustshield</groupId>
+  <artifactId>trustshield-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>TrustShield - Parent POM</name>
+  <description>Unified cybersecurity intelligence platform for real-time threat detection</description>
+
+  <!--
+    MODULE LIST
+    ===========
+    Only modules that physically exist on disk may be listed here, or the build
+    fails immediately with "Child module ... does not exist" — before compiling a
+    single line. So this list grows as modules land, and every commented-out entry
+    below is an accurate statement that the directory is not there yet.
+
+    Currently buildable:  common, phishing-service, breach-service, gateway
+  -->
+  <modules>
+    <module>trustshield-common</module>
+    <module>trustshield-phishing-service</module>
+    <module>trustshield-breach-service</module>
+    <module>trustshield-gateway</module>
+    <module>trustshield-deepfake-service</module>
+    <module>trustshield-fakenews-service</module>
+    <module>trustshield-integrity-service</module>
+    <module>trustshield-fusion-service</module>
+    <module>trustshield-bot-service</module>
+    <!-- <module>trustshield-auth-service</module> -->
+    <!-- <module>trustshield-notification-service</module> -->
+  </modules>
+
+  <properties>
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring-cloud.version>2023.0.3</spring-cloud.version>
+    <djl.version>0.27.0</djl.version>
+    <jjwt.version>0.12.6</jjwt.version>
+    <testcontainers.version>1.19.8</testcontainers.version>
+    <metadata-extractor.version>2.19.0</metadata-extractor.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- ML inference (deepfake-service only; ONNX runtime is optional at runtime) -->
+      <dependency>
+        <groupId>ai.djl</groupId>
+        <artifactId>api</artifactId>
+        <version>${djl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ai.djl.onnxruntime</groupId>
+        <artifactId>onnxruntime-engine</artifactId>
+        <version>${djl.version}</version>
+      </dependency>
+
+      <!-- EXIF / metadata forensics for the deepfake module -->
+      <dependency>
+        <groupId>com.drewnoakes</groupId>
+        <artifactId>metadata-extractor</artifactId>
+        <version>${metadata-extractor.version}</version>
+      </dependency>
+
+      <!-- JWT -->
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.trustshield</groupId>
+        <artifactId>trustshield-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- Shared by every module -->
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>

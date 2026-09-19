@@ -1,0 +1,44 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: trustshield-integrity-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # H2 in-memory datastore: fast, reproducible, zero external dependencies
+  datasource:
+    url: jdbc:h2:mem:trustshield_integrity;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  integrity:
+    # 64-character hex zero hash representing the unchained state before entry 0
+    genesis-hash: "0000000000000000000000000000000000000000000000000000000000000000"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

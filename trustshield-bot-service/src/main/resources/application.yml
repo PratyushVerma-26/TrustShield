@@ -1,0 +1,52 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: trustshield-bot-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # In-memory H2 database: zero external dependency local execution
+  datasource:
+    url: jdbc:h2:mem:trustshield_bot;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  bot:
+    whatsapp-verify-token: ${WHATSAPP_VERIFY_TOKEN:trustshield_webhook_token_2026}
+    default-timeout-ms: 4000
+  services:
+    gateway-url: ${TRUSTSHIELD_GATEWAY_URL:http://localhost:8080}
+    phishing-url: ${TRUSTSHIELD_PHISHING_URL:http://localhost:8083}
+    breach-url: ${TRUSTSHIELD_BREACH_URL:http://localhost:8084}
+    deepfake-url: ${TRUSTSHIELD_DEEPFAKE_URL:http://localhost:8085}
+    fakenews-url: ${TRUSTSHIELD_FAKENEWS_URL:http://localhost:8086}
+    integrity-url: ${TRUSTSHIELD_INTEGRITY_URL:http://localhost:8087}
+    fusion-url: ${TRUSTSHIELD_FUSION_URL:http://localhost:8088}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

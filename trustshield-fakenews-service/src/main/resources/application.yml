@@ -1,0 +1,68 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: trustshield-fakenews-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # H2 in-memory datastore: zero external dependencies, fast and reproducible
+  datasource:
+    url: jdbc:h2:mem:trustshield_fakenews;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  fakenews:
+    fact-check:
+      # Google Fact Check Tools API: free, ships disabled by default, requires an API key
+      enabled: ${TRUSTSHIELD_FACT_CHECK_ENABLED:false}
+      api-key: ${GOOGLE_FACT_CHECK_API_KEY:${FACT_CHECK_API_KEY:}}
+      base-url: ${GOOGLE_FACT_CHECK_URL:https://factchecktools.googleapis.com/v1alpha1/claims:search}
+      timeout-ms: 3000
+      language-code: en
+    simhash:
+      # Bundled offline catalogue of known debunked hoaxes and misinformation claims
+      catalog-path: classpath:misinformation/debunked_claims.json
+      # Minimum similarity threshold (0.0 - 1.0) to declare near-duplicate match
+      similarity-threshold: 0.78
+      # Higher threshold for near-verbatim matching
+      high-similarity-threshold: 0.90
+    style:
+      # Hard ceiling invariant: linguistic style markers can never exceed this score on their own
+      max-style-score: 55
+      high-capitalisation-threshold: 0.30
+      sensational-punctuation-threshold: 2
+    directory:
+      enabled: ${TRUSTSHIELD_FACTCHECK_DIRECTORY_ENABLED:false}
+      endpoint: ${TRUSTSHIELD_FACTCHECK_DIRECTORY_URL:https://factchecktools.googleapis.com/v1alpha1/claims:search}
+      timeout-ms: 3000
+    multimodal:
+      enabled: true
+      chyron-anomaly-threshold: 0.65
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

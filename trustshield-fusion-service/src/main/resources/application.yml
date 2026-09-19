@@ -1,0 +1,54 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: trustshield-fusion-service
+  config:
+    import:
+      - "optional:file:.env[.properties]"
+      - "optional:file:../.env[.properties]"
+
+  # In-memory H2 database: reproducible, zero-dependency local execution
+  datasource:
+    url: jdbc:h2:mem:trustshield_fusion;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+trustshield:
+  fusion:
+    # Strict Invariant Thresholds
+    dangerous-threshold: 75
+    suspicious-threshold: 40
+    multi-modal-suspicious-count: 2
+    ledger-tamper-override-score: 95
+    coordination-compound-bonus: 15
+  services:
+    phishing-url: ${TRUSTSHIELD_PHISHING_URL:http://localhost:8083}
+    breach-url: ${TRUSTSHIELD_BREACH_URL:http://localhost:8084}
+    deepfake-url: ${TRUSTSHIELD_DEEPFAKE_URL:http://localhost:8085}
+    fakenews-url: ${TRUSTSHIELD_FAKENEWS_URL:http://localhost:8086}
+    integrity-url: ${TRUSTSHIELD_INTEGRITY_URL:http://localhost:8087}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
