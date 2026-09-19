@@ -24,6 +24,8 @@ single question in a viva ("show me that number") collapses the whole document.
 | `trustshield-integrity-service` | **Working** | Cryptographic append-only SHA-256 hash chain, Ed25519 digital signatures, firstCorruptedIndex diagnosis, REST API on port 8087, H2 persistence, tests |
 | `trustshield-fusion-service` | **Working** | Cross-modal threat aggregator, canonical auditable rules R1 (Conclusive Dangerous), R2 (Multi-Modal Suspicious Escalation), R3 (Coverage Invariant), R4 (Cryptographic Ledger Override), R5 (Cross-Modal Coordination Multiplier), H2 persistence, REST API on port 8088, 23 tests |
 | `trustshield-bot-service` | **Working** | Conversational cyber-defense bot gateway (Port 8089) for WhatsApp, Telegram, and Web Chat, automatic intent classification, mobile markdown threat badges, resilient microservice router with offline fallbacks, H2 persistence, mockable webhooks with `hub.challenge` handshake, 25 tests |
+| `packages/verdict-core` | **Working** | Shared TypeScript library enforcing presentation invariants at compile time via discriminated unions; typed `TrustShieldApiClient` for all 7 backend vectors; Vitest test suite |
+| `packages/web-console` | **Working** | Modern React 18 + Vite cyber-defense console with 7 dedicated forensic vector panels, bot simulator, dark-mode threat HUD, embedded into Gateway static distribution (:8080) |
 
 **The bundled phishing model is not trained.** `phishing_model.json` ships with
 hand-initialised bootstrap weights so the service is runnable before a dataset is
@@ -652,6 +654,94 @@ Invoke-RestMethod -Method Get -Uri http://localhost:8080/api/v1/bot/history
 
 ---
 
+## Client Layer: Cyber-Defense Web Console & TypeScript SDK
+
+TrustShield provides a typed client layer and a full-featured cyber-defense operations console built on modern web standards (React 18 + Vite + TypeScript).
+
+```
+packages/
+├── verdict-core/              Shared TypeScript library enforcing presentation invariants
+│   ├── src/
+│   │   ├── types.ts           Discriminated union: Conclusive | Inconclusive | NotApplicable
+│   │   ├── presentation.ts    Invariant enforcement: assertCanRenderSafe, formatDisplayScore
+│   │   ├── client.ts          Typed HTTP client (TrustShieldApiClient) for all 7 backend services
+│   │   └── index.ts           Public library entrypoint
+│   └── tests/                 Vitest test suite verifying presentation invariants
+└── web-console/               Cyber-defense operations HUD (React 18 + Vite)
+    ├── src/
+    │   ├── components/        7 Dedicated vector panels + VerdictBadge + BotSimulator
+    │   ├── App.tsx            Main console layout, vector navigation, gateway health polling
+    │   └── index.css          Hatched unmeasured pattern, signed attribution, status badges
+    └── vite.config.ts         Development proxy mapping /api, /webhook to Gateway (:8080)
+```
+
+### 1. The Presentation Invariant Enforced at Compile Time (`packages/verdict-core`)
+
+A central architectural requirement of TrustShield is: **absence of evidence is not evidence of absence**. If a downstream scanner failed, timed out, or encountered unmeasured media, the user interface must *never* render a green "Safe" badge or an misleading "0/100" risk score.
+
+In `packages/verdict-core`, this invariant is enforced at the TypeScript compiler level via a **discriminated union**:
+
+```typescript
+export type Verdict = ConclusiveVerdict | InconclusiveVerdict | NotApplicableVerdict;
+
+export interface ConclusiveVerdict {
+  isConclusive: true;
+  threatLevel: 'SAFE' | 'LOW' | 'SUSPICIOUS' | 'DANGEROUS';
+  riskScore: number; // 0..100
+  explanation: string;
+}
+
+export interface InconclusiveVerdict {
+  isConclusive: false;
+  threatLevel: 'UNKNOWN';
+  riskScore: null;   // null prevents numeric operations
+  reason: InconclusiveReason;
+  degraded: boolean;
+}
+```
+
+Attempting to access `.riskScore` without first checking `verdict.isConclusive === true` produces a compile-time error. Furthermore:
+- `assertCanRenderSafe(verdict)` throws a runtime exception if invoked on an inconclusive verdict.
+- `formatDisplayScore(verdict)` renders a dash (`—`) rather than `0/100` when a score was not measured.
+- `getBadgePresentation(verdict)` assigns the `.hatched-unmeasured` styling and `❓ UNVERIFIED` badge.
+
+### 2. Forensic Cyber-Defense Console (`packages/web-console`)
+
+The React console connects to the Unified Gateway (`http://localhost:8080`) and provides 7 interactive operations panels:
+1. **Phishing Shield**: Real-time URL classification, signed logit attribution bar chart, Safe Browsing and VirusTotal reputation indicators.
+2. **Breach Monitor**: k-Anonymity 5-character SHA-1 prefix demonstration, password structural complexity radar, and offline catalog lookup.
+3. **Deepfake Forensics**: 6 image forensic signals (ELA, DQT, Noise residual, 8x8 blockiness, EXIF, C2PA), video container parsing, acoustic biophysics forensics.
+4. **Fake News Firewall**: Multi-source ClaimReview match inspector, 35-domain publisher credibility database, SimHash near-duplicate matcher, capped style metrics.
+5. **Cross-Modal Fusion Playground**: Interactive playground for Rules R1–R5, coverage mapping, and cryptographic tampering override.
+6. **Integrity Ledger**: Live linear SHA-256 hash chain links, Ed25519 asymmetric signatures, and retroactive tamper simulation with `firstCorruptedIndex` diagnosis.
+7. **Bot Simulator**: WhatsApp / Telegram mobile chat simulator with markdown threat formatting and quick presets.
+
+### 3. Running the Client Layer
+
+#### Option A: Single-Origin Gateway Hosting (Embedded)
+The web console is pre-compiled into `trustshield-gateway/src/main/resources/static/`. When the backend gateway is running, simply navigate to:
+```
+http://localhost:8080/
+```
+No separate Node or frontend dev server is required in production or for single-origin demonstrations.
+
+#### Option B: Standalone Vite Dev Server (Hot-Reload)
+For frontend development with instant hot-module replacement:
+```bash
+# 1. Build the shared verdict-core library
+cd packages/verdict-core
+npm install
+npm run build
+npm test              # Run 5/5 invariant tests
+
+# 2. Start the Vite dev server
+cd ../web-console
+npm install
+npm run dev           # Serves at http://localhost:5173 with proxy to :8080
+```
+
+---
+
 ## Optional: PostgreSQL instead of H2
 
 ```bash
@@ -755,6 +845,22 @@ trustshield/
 │       ├── service/                 IntegrityLedgerService (append, verify, diagnosis)
 │       ├── controller/              REST API on /api/v1/integrity and /api/v1/ledger
 │       └── entity/ repository/      LedgerEntryRecord and H2 persistence
+├── trustshield-fusion-service/      Cross-modal threat aggregator & rules engine on port 8088
+│   └── src/main/java/com/trustshield/fusion/
+│       ├── rules/                   Deterministic evaluation rules R1–R5
+│       ├── service/                 Composite incident aggregator & ledger override
+│       └── controller/              REST API on /api/v1/fusion and /api/v1/incident
+├── trustshield-bot-service/         Conversational cyber-defense bot gateway on port 8089
+│   └── src/main/java/com/trustshield/bot/
+│       ├── router/                  Microservice routing and intent classifier
+│       ├── formatter/               Mobile markdown threat badge generator
+│       └── controller/              WhatsApp/Telegram webhooks and /api/v1/bot/message
+├── packages/
+│   ├── verdict-core/                TypeScript library with discriminated union invariants & client
+│   │   ├── src/                     types.ts, presentation.ts, client.ts
+│   │   └── tests/                   Invariant enforcement test suite (Vitest)
+│   └── web-console/                 React 18 + Vite cyber-defense console (7 vector panels)
+│       └── src/                     App.tsx, components/, index.css
 └── scripts/
     ├── run-all.ps1                  Multi-service runner (build, start, status, stop)
     ├── static_check.py              Static sanity checking (structure, braces, contracts)

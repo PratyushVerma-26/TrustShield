@@ -1,0 +1,31 @@
+{
+  "name": "@trustshield/verdict-core",
+  "version": "1.0.0",
+  "description": "Canonical TypeScript contracts, discriminated union threat models, presentation invariants, and typed HTTP client for TrustShield",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "cybersecurity",
+    "threat-intelligence",
+    "deepfake-detection",
+    "phishing",
+    "fact-checking"
+  ],
+  "author": "TrustShield Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
