@@ -6,7 +6,6 @@ import { DeepfakePanel } from './components/DeepfakePanel.tsx';
 import { FakeNewsPanel } from './components/FakeNewsPanel.tsx';
 import { FusionPanel } from './components/FusionPanel.tsx';
 import { LedgerPanel } from './components/LedgerPanel.tsx';
-import { BotSimulatorPanel } from './components/BotSimulatorPanel.tsx';
 import {
   Shield,
   Globe,
@@ -15,11 +14,10 @@ import {
   Newspaper,
   Layers,
   Database,
-  MessageSquare,
   Activity
 } from 'lucide-react';
 
-type Tab = 'phishing' | 'breach' | 'deepfake' | 'fakenews' | 'fusion' | 'ledger' | 'bot';
+type Tab = 'phishing' | 'breach' | 'deepfake' | 'fakenews' | 'fusion' | 'ledger';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('phishing');
@@ -41,8 +39,7 @@ export const App: React.FC = () => {
     { id: 'deepfake', label: 'Deepfake Forensics', icon: Film, port: '8085' },
     { id: 'fakenews', label: 'Fake News Firewall', icon: Newspaper, port: '8086' },
     { id: 'fusion', label: 'Cross-Modal Fusion', icon: Layers, port: '8088' },
-    { id: 'ledger', label: 'Integrity Ledger', icon: Database, port: '8087' },
-    { id: 'bot', label: 'Bot Simulator', icon: MessageSquare, port: '8089' },
+    { id: 'ledger', label: 'Integrity Ledger', icon: Database, port: '8087' }
   ];
 
   return (
@@ -222,7 +219,6 @@ export const App: React.FC = () => {
           {activeTab === 'fakenews' && <FakeNewsPanel client={client} />}
           {activeTab === 'fusion' && <FusionPanel client={client} />}
           {activeTab === 'ledger' && <LedgerPanel client={client} />}
-          {activeTab === 'bot' && <BotSimulatorPanel client={client} />}
         </main>
       </div>
 

@@ -49,6 +49,14 @@ public class BotController {
         this.whatsappVerifyToken = whatsappVerifyToken;
     }
 
+    @GetMapping(value = "/chat")
+    @Operation(summary = "Redirect to standalone web chat portal")
+    public ResponseEntity<Void> chatRedirect() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(java.net.URI.create("/chat.html"))
+                .build();
+    }
+
     @PostMapping(
             value = {"/api/v1/bot/message", "/api/v1/bot/analyze"},
             consumes = MediaType.APPLICATION_JSON_VALUE,

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustShield Cyber-Defense Bot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #0B0F19; color: #F8FAFC; display: flex; flex-direction: column; height: 100vh; }
+    
+    header { background-color: #0F172A; border-bottom: 1px solid #1E293B; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo-group { display: flex; align-items: center; gap: 0.75rem; }
+    .bot-avatar { width: 40px; height: 40px; border-radius: 50%; background: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    .bot-info h1 { font-size: 1.1rem; font-weight: 700; color: #F8FAFC; }
+    .bot-info p { font-size: 0.75rem; color: #10B981; display: flex; align-items: center; gap: 0.35rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10B981; }
+
+    .header-links { display: flex; gap: 1rem; font-size: 0.8rem; color: #94A3B8; }
+    .header-links a { color: #38BDF8; text-decoration: none; }
+
+    .chat-container { flex: 1; max-width: 800px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    
+    .message-bubble { max-width: 85%; padding: 0.85rem 1.15rem; border-radius: 1rem; line-height: 1.5; font-size: 0.9rem; word-wrap: break-word; white-space: pre-wrap; }
+    .message-user { align-self: flex-end; background-color: #0284C7; color: #FFFFFF; border-bottom-right-radius: 0.25rem; }
+    .message-bot { align-self: flex-start; background-color: #1E293B; color: #F1F5F9; border-bottom-left-radius: 0.25rem; border: 1px solid #334155; }
+    .message-time { font-size: 0.65rem; color: rgba(255, 255, 255, 0.6); margin-top: 0.35rem; text-align: right; }
+
+    .quick-chips { padding: 0.5rem 1.5rem; display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; }
+    .chip { background: #1E293B; border: 1px solid #334155; color: #CBD5E1; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.75rem; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+    .chip:hover { background: #334155; color: #FFFFFF; }
+
+    .chat-input-area { padding: 1rem 1.5rem; background-color: #0F172A; border-top: 1px solid #1E293B; display: flex; gap: 0.75rem; align-items: center; }
+    .chat-input { flex: 1; background-color: #0B0F19; border: 1px solid #334155; border-radius: 0.5rem; padding: 0.75rem 1rem; color: #F8FAFC; font-size: 0.9rem; outline: none; }
+    .chat-input:focus { border-color: #0284C7; }
+    .send-btn { background-color: #10B981; color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+    .send-btn:hover { opacity: 0.9; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .badge-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-weight: 800; font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid #EF4444; }
+    .badge-suspicious { background: rgba(245, 158, 11, 0.2); color: #FBBF24; border: 1px solid #F59E0B; }
+    .badge-safe { background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid #10B981; }
+    .badge-unknown { background: rgba(148, 163, 184, 0.2); color: #94A3B8; border: 1px dashed #64748B; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-group">
+      <div class="bot-avatar">🛡️</div>
+      <div class="bot-info">
+        <h1>TrustShield Defense Bot</h1>
+        <p><span class="status-dot"></span> Online · Multi-Vector Security Bot</p>
+      </div>
+    </div>
+    <div class="header-links">
+      <span>Direct Web Chat</span>
+      <span>·</span>
+      <a href="/swagger-ui.html" target="_blank">API Docs</a>
+      <span>·</span>
+      <a href="/" target="_blank">Security Console</a>
+    </div>
+  </header>
+
+  <div class="chat-container">
+    <div class="chat-messages" id="messagesContainer">
+      <div class="message-bubble message-bot">
+        🛡️ <strong>Welcome to TrustShield Cyber-Defense Bot!</strong><br><br>
+        You can forward any suspicious URL, headline claim, or command directly to this chat.<br>
+        • Try sending: <code>https://sbi-verification.tk/auth</code><br>
+        • Or type <code>/rules</code> or <code>/help</code> for commands.
+        <div class="message-time">Just now</div>
+      </div>
+    </div>
+
+    <!-- Quick preset chips -->
+    <div class="quick-chips">
+      <button class="chip" onclick="sendQuick('Please verify your account urgently at http://sbi-verification.tk/login')">🚨 Phishing Link</button>
+      <button class="chip" onclick="sendQuick('UNESCO has declared Indian national anthem best in the world!')">📰 Viral Fact-Check</button>
+      <button class="chip" onclick="sendQuick('password: SecretPassword123!')">🔑 Password Exposure</button>
+      <button class="chip" onclick="sendQuick('/rules')">⚡ Active Fusion Rules</button>
+      <button class="chip" onclick="sendQuick('/help')">❓ Help</button>
+    </div>
+
+    <!-- Input Box -->
+    <div class="chat-input-area">
+      <input
+        type="text"
+        id="userInput"
+        class="chat-input"
+        placeholder="Type a message, paste a link, or enter /rules..."
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter') sendMessage()"
+      />
+      <button id="sendBtn" class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesContainer = document.getElementById('messagesContainer');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Auto-detect gateway endpoint: if running on port 8089 or 8080, route correctly
+    const API_ENDPOINT = window.location.port === '8089' 
+      ? '/api/v1/bot/message' 
+      : '/api/v1/bot/message';
+
+    function addMessage(text, sender) {
+      const bubble = document.createElement('div');
+      bubble.className = `message-bubble message-${sender}`;
+      bubble.innerText = text;
+
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      bubble.appendChild(time);
+
+      messagesContainer.appendChild(bubble);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    async function sendMessage(textOverride) {
+      const text = (textOverride || userInput.value).trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      if (!textOverride) userInput.value = '';
+
+      sendBtn.disabled = true;
+      userInput.disabled = true;
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channel: 'WEB_CHAT',
+            senderId: 'public-web-user',
+            messageText: text
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        addMessage(data.replyText || 'No reply received.', 'bot');
+      } catch (err) {
+        addMessage(`⚠️ Failed to contact TrustShield Bot: ${err.message}`, 'bot');
+      } finally {
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+        userInput.focus();
+      }
+    }
+
+    function sendQuick(text) {
+      userInput.value = text;
+      sendMessage();
+    }
+  </script>
+</body>
+</html>

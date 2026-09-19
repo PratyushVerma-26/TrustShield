@@ -48,6 +48,13 @@ public class GatewayProxyController {
         this.properties = properties;
     }
 
+    @org.springframework.web.bind.annotation.GetMapping(value = "/chat")
+    public ResponseEntity<Void> chatRedirect() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("/chat.html"))
+                .build();
+    }
+
     @RequestMapping(value = {
             "/api/v1/phishing/**",
             "/api/v1/breach/**",
