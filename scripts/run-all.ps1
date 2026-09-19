@@ -172,6 +172,30 @@ if ($Status) {
 }
 
 if ($Build) {
+    Write-Host "`n[Building client packages: verdict-core & web-console]..." -ForegroundColor Cyan
+    Push-Location (Join-Path $RepoRoot "packages\verdict-core")
+    try {
+        npm run build
+    } catch {
+        Write-Warning "verdict-core build encountered an issue: $_"
+    } finally {
+        Pop-Location
+    }
+
+    Push-Location (Join-Path $RepoRoot "packages\web-console")
+    try {
+        npm run build
+        $staticTarget = Join-Path $RepoRoot "trustshield-gateway\src\main\resources\static"
+        if (-not (Test-Path $staticTarget)) {
+            New-Item -ItemType Directory -Force -Path $staticTarget | Out-Null
+        }
+        Copy-Item -Recurse -Force dist/* $staticTarget/
+    } catch {
+        Write-Warning "web-console build encountered an issue: $_"
+    } finally {
+        Pop-Location
+    }
+
     Write-Host "`n[Building all available modules with Maven]..." -ForegroundColor Cyan
     Push-Location $RepoRoot
     try {
