@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: trustshield-gateway
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
 
 trustshield:
   gateway:
@@ -38,4 +42,4 @@ management:
         include: health, info
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized

@@ -9,6 +9,11 @@ spring:
       - "optional:file:.env[.properties]"
       - "optional:file:../.env[.properties]"
 
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
+
   # H2 in-memory by default: zero external dependencies, immediate startup.
   datasource:
     url: jdbc:h2:mem:trustshield_deepfake;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -52,4 +57,4 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized

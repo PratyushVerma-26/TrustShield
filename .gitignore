@@ -19,9 +19,12 @@ target/
 logs/
 **/logs/
 *.log
+*.pdf
 *.h2.db
 *.trace.db
 .run-all-pids.json
+scratch/
+**/scratch/
 
 # Environment variables and secrets
 .env

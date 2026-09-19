@@ -28,8 +28,6 @@ single question in a viva ("show me that number") collapses the whole document.
 | `packages/web-console` | **Working** | Modern React 18 + Vite cyber-defense operations console with 6 dedicated forensic vector panels, threat HUD, standalone analyst cockpit (no embedded simulators), embedded into Gateway static distribution (:8080) |
 | `packages/mobile-app` | **Working** | Standalone Expo / React Native mobile app with on-device threat evaluation, edge rule engine, EAS build profile for standalone Android APK generation and App Store distribution |
 
-> **Looking to make your deployment public?** See the step-by-step [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for instructions on exposing the Web Console, Telegram Bot, WhatsApp Cloud API, Standalone Web Chat, and building distributable Android APKs with Cloudflare Tunnel, Ngrok, or VPS.
-
 **The bundled phishing model is trained and verified.** `phishing_model.json`
 has been trained on a balanced 10,000-URL dataset (`data/urls.csv`) with 5-fold
 cross-validation. Its `provenance` field reports `TRAINED`, `trainedOn` is

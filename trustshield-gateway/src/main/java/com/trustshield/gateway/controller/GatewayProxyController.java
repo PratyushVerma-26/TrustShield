@@ -74,6 +74,14 @@ public class GatewayProxyController {
     ) {
         String path = request.getRequestURI();
         String query = request.getQueryString();
+
+        // Security check: Prevent path traversal and directory climbing attacks (CWE-22)
+        if (path == null || path.contains("..") || path.contains("\\")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("error", "MALFORMED_PATH", "message", "Illegal path traversal sequence detected"));
+        }
+
         String targetBaseUrl = resolveTargetBaseUrl(path);
 
         if (targetBaseUrl == null) {
@@ -82,8 +90,20 @@ public class GatewayProxyController {
                     .body(Map.of("error", "NO_ROUTE_FOR_PATH", "path", path));
         }
 
-        String targetUriStr = targetBaseUrl + path + (query != null ? "?" + query : "");
-        URI targetUri = URI.create(targetUriStr);
+        URI targetUri;
+        try {
+            targetUri = org.springframework.web.util.UriComponentsBuilder
+                    .fromHttpUrl(targetBaseUrl)
+                    .path(path)
+                    .query(query)
+                    .build(true)
+                    .toUri();
+        } catch (Exception e) {
+            log.warn("Invalid URI parameters received for path {}: {}", path, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("error", "BAD_REQUEST", "message", "Malformed request path or query string"));
+        }
 
         try {
             var requestSpec = restClient.method(method)
@@ -120,12 +140,12 @@ public class GatewayProxyController {
             });
 
         } catch (ResourceAccessException e) {
-            log.warn("Downstream service unreachable for path {}: {}", path, e.getMessage());
+            log.warn("Downstream service unreachable for path {} (target: {}): {}", path, targetBaseUrl, e.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of(
                             "error", "SERVICE_UNAVAILABLE",
-                            "message", "Target microservice is not reachable: " + targetBaseUrl,
+                            "message", "Target microservice is temporarily unreachable or starting up. Please retry shortly.",
                             "path", path,
                             "degraded", true
                     ));
@@ -134,12 +154,12 @@ public class GatewayProxyController {
                     .headers(e.getResponseHeaders())
                     .body(e.getResponseBodyAsByteArray());
         } catch (Exception e) {
-            log.error("Proxy routing error for path {}: {}", path, e.getMessage(), e);
+            log.error("Proxy routing error for path {} (target: {}): {}", path, targetBaseUrl, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of(
                             "error", "BAD_GATEWAY",
-                            "message", "Error proxying request to " + targetBaseUrl + ": " + e.getMessage(),
+                            "message", "Downstream proxy request could not be completed.",
                             "path", path
                     ));
         }

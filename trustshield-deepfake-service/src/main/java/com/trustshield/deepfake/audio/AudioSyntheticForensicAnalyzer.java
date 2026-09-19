@@ -103,21 +103,29 @@ public class AudioSyntheticForensicAnalyzer {
             for (int i = 12; i < bytes.length - 8; i++) {
                 if (bytes[i] == 'd' && bytes[i + 1] == 'a' && bytes[i + 2] == 't' && bytes[i + 3] == 'a') {
                     dataOffset = i + 8;
-                    int chunkSize = ((bytes[i + 4] & 0xFF)) |
-                                    ((bytes[i + 5] & 0xFF) << 8) |
-                                    ((bytes[i + 6] & 0xFF) << 16) |
-                                    ((bytes[i + 7] & 0xFF) << 24);
-                    dataLength = Math.min(chunkSize, bytes.length - dataOffset);
+                    long chunkSizeUnsigned = (((long) (bytes[i + 4] & 0xFF))) |
+                                    (((long) (bytes[i + 5] & 0xFF)) << 8) |
+                                    (((long) (bytes[i + 6] & 0xFF)) << 16) |
+                                    (((long) (bytes[i + 7] & 0xFF)) << 24);
+                    int remainingBytes = Math.max(0, bytes.length - dataOffset);
+                    dataLength = (int) Math.min(chunkSizeUnsigned, (long) remainingBytes);
                     break;
                 }
             }
         }
+
+        if (dataOffset < 0 || dataOffset >= bytes.length) return new double[0];
 
         int sampleCount = dataLength / 2;
         if (sampleCount <= 0) return new double[0];
 
         // Limit to first 48,000 samples (~3 seconds at 16kHz) for sub-millisecond execution
         int limit = Math.min(sampleCount, 48000);
+        if (dataOffset + limit * 2 > bytes.length) {
+            limit = Math.max(0, (bytes.length - dataOffset) / 2);
+        }
+        if (limit <= 0) return new double[0];
+
         double[] samples = new double[limit];
 
         ByteBuffer buffer = ByteBuffer.wrap(bytes, dataOffset, limit * 2).order(ByteOrder.LITTLE_ENDIAN);

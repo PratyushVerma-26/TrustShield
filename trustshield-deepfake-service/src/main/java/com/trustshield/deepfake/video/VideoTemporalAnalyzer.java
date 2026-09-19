@@ -109,9 +109,11 @@ public class VideoTemporalAnalyzer {
         );
     }
 
+    private static final int MAX_FRAME_SEARCH_WINDOW = 4 * 1024 * 1024; // 4 MB maximum search window per keyframe
+
     /**
      * Extracts embedded JPEG frame sequences (0xFF 0xD8 ... 0xFF 0xD9) often found in Motion-JPEG,
-     * embedded thumbnails, or keyframe packets.
+     * embedded thumbnails, or keyframe packets in linear O(N) time with bounded memory.
      */
     private List<BufferedImage> extractEmbeddedJpegs(byte[] bytes, int maxFrames) {
         List<BufferedImage> frames = new ArrayList<>();
@@ -121,7 +123,8 @@ public class VideoTemporalAnalyzer {
                 // Found JPEG start marker
                 int start = i;
                 int end = -1;
-                for (int j = start + 2; j < bytes.length - 1; j++) {
+                int searchLimit = Math.min(bytes.length - 1, start + MAX_FRAME_SEARCH_WINDOW);
+                for (int j = start + 2; j < searchLimit; j++) {
                     if ((bytes[j] & 0xFF) == 0xFF && (bytes[j + 1] & 0xFF) == 0xD9) {
                         end = j + 2;
                         break;
@@ -137,6 +140,10 @@ public class VideoTemporalAnalyzer {
                         }
                     } catch (Exception ignored) {}
                     i = end;
+                    continue;
+                } else {
+                    // Advance past marker to guarantee linear O(N) complexity
+                    i = start + 2;
                     continue;
                 }
             }

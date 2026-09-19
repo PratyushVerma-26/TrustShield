@@ -13,7 +13,17 @@ public record GatewayProperties(
         Services services
 ) {
     public GatewayProperties {
-        cors = cors == null ? new Cors(List.of("*"), List.of("*"), List.of("*"), true) : cors;
+        if (cors == null) {
+            cors = new Cors(
+                    List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:5173", "http://127.0.0.1:3000", "http://127.0.0.1:8080"),
+                    List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"),
+                    List.of("*"),
+                    true
+            );
+        } else if (cors.allowedOrigins() != null && cors.allowedOrigins().contains("*") && cors.allowCredentials()) {
+            // OWASP & W3C CORS fix: Wildcard origin with allowCredentials=true is an invalid/insecure configuration
+            cors = new Cors(cors.allowedOrigins(), cors.allowedMethods(), cors.allowedHeaders(), false);
+        }
         services = services == null ? new Services(
                 "http://localhost:8083",
                 "http://localhost:8084",

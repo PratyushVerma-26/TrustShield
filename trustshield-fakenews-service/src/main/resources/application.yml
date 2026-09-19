@@ -9,6 +9,11 @@ spring:
       - "optional:file:.env[.properties]"
       - "optional:file:../.env[.properties]"
 
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
+
   # H2 in-memory datastore: zero external dependencies, fast and reproducible
   datasource:
     url: jdbc:h2:mem:trustshield_fakenews;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -65,4 +70,4 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
