@@ -21,29 +21,21 @@ import com.trustshield.breach.hibp.BreachLookupResult;
 import com.trustshield.common.util.HashUtils;
 
 /**
- * Offline membership check against a bundled list of well-known weak passwords.
+ * Offline membership verification against a bundled catalog of known weak passwords.
  *
- * <p><strong>Why this exists.</strong> The Pwned Passwords range API is the real
- * source, but it needs connectivity. A demo that depends on a network call can
- * fail in front of an examiner, so the service ships a small local list and
- * always consults it. The two sources are complementary: the API is
- * authoritative, this is merely always available.
+ * <p>Provides immediate, zero-latency local fallback capability alongside
+ * the k-anonymous Pwned Passwords range API.
  *
- * <h2>Honesty constraints baked into this class</h2>
- *
+ * <p>Key properties:
  * <ul>
- *   <li>A match returns {@link BreachLookupResult#exposedCountUnknown} — never a
- *       count. This source knows membership only, and inventing an occurrence
- *       figure would be fabricating a statistic.</li>
- *   <li>A miss returns {@code UNAVAILABLE}, not {@code NOT_FOUND}. With a list
- *       this short, absence carries almost no information, and reporting it as
- *       "not found" would invite the reader to treat it as "safe". The
- *       distinction is enforced here rather than left to the caller.</li>
+ *   <li>A match returns {@link BreachLookupResult#exposedCountUnknown}; frequency counts
+ *       are not fabricated since this source only verifies set membership.</li>
+ *   <li>A non-match returns {@code UNAVAILABLE} rather than {@code NOT_FOUND}, since a small
+ *       offline catalog cannot verify absence across global breach corpora.</li>
  * </ul>
  *
- * <p>Only SHA-1 digests are retained in memory; the plaintext lines are
- * discarded after loading. The source file stays plaintext on disk so it can be
- * audited — see the header comment in {@code common-passwords.txt}.
+ * <p>Only SHA-1 digests are stored in memory; plaintext entries are discarded
+ * immediately after catalog ingestion.
  */
 @Component
 public class CommonPasswordCatalog {

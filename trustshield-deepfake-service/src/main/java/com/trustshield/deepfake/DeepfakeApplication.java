@@ -16,8 +16,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *   <li>C2PA / JUMBF manifest presence detection (presence only, not signature verification).</li>
  * </ol>
  *
- * <p>Enforces the honest failure invariant: recompressed media returns {@code ThreatLevel.UNKNOWN}
- * rather than falsely claiming clean provenance.
+ * <p>When recompression destroys forensic artifacts, returns {@code ThreatLevel.UNKNOWN}
+ * to prevent false safe verdicts.
  */
 @SpringBootApplication
 public class DeepfakeApplication {

@@ -11,25 +11,15 @@ package com.trustshield.common.dto;
  * even weak positive evidence lands in SUSPICIOUS rather than SAFE, because the
  * cost of a missed phishing page is far higher than the cost of an extra warning.
  *
- * <h2>Why UNKNOWN is not a band</h2>
+ * <h2>Semantics of UNKNOWN</h2>
  *
- * <p>The other four constants describe <em>what was found</em>. {@link #UNKNOWN}
- * describes the absence of a finding: the module could not gather evidence in
- * either direction, so no score it produced would mean anything. Without this
- * constant a module that reached zero sources has to report {@code SAFE}, because
- * that is what {@link #fromScore} does with a score of 0 — and a dashboard that
- * colours its badge from the severity band would then render an unchecked
- * credential green. That is the third time this project has hit the same bug, so
- * the type system now carries the distinction instead of relying on every caller
- * to remember it.
+ * <p>The first four constants describe assessed threat levels. {@link #UNKNOWN}
+ * represents an indeterminate state where evidence could not be gathered (e.g.
+ * unreachable external sources or destructive recompression). This prevents
+ * unverified targets from receiving a default {@code SAFE} rating.
  *
- * <p>{@code UNKNOWN} is deliberately declared <strong>last</strong>. Ordinal order
- * is not persisted (both entities use {@code EnumType.STRING}), so the position is
- * free — and severity is genuinely <em>incomparable</em> with the other four, not
- * lower or higher. Since some future caller will nonetheless sort by ordinal to
- * find a "worst" verdict, last is the position where that mistake surfaces
- * {@code UNKNOWN} rather than hides it. Prefer {@link #isConclusive()} to any
- * ordinal comparison.
+ * <p>{@code UNKNOWN} is placed last in declaration order. Prefer {@link #isConclusive()}
+ * rather than ordinal comparisons.
  */
 public enum ThreatLevel {
 

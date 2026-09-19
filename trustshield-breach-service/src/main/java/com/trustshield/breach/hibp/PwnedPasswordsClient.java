@@ -12,39 +12,18 @@ import com.trustshield.breach.config.BreachProperties;
 import com.trustshield.common.util.HashUtils;
 
 /**
- * Client for the Pwned Passwords range API, implementing k-anonymity properly.
+ * Client for the HaveIBeenPwned Pwned Passwords range API, implementing k-anonymity.
  *
- * <h2>The protocol, and why each step matters</h2>
- *
+ * <p>Execution Protocol:
  * <ol>
- *   <li>SHA-1 the candidate password locally and upper-case the hex. SHA-1 is
- *       used because the protocol mandates it, not because it was chosen as a
- *       secure hash — see {@link HashUtils#sha1HexUpper}.</li>
- *   <li>Send only the <strong>first five hex characters</strong> as a path
- *       segment: {@code GET /range/21BD1}.</li>
- *   <li>The server returns every suffix in that bucket with its occurrence
- *       count — typically several hundred lines.</li>
- *   <li>Match the remaining <strong>35 characters</strong> locally.</li>
+ *   <li>Compute local SHA-1 digest of candidate password: {@link HashUtils#sha1HexUpper}.</li>
+ *   <li>Transmit only the first 5 hex characters as a bucket prefix: {@code GET /range/{prefix}}.</li>
+ *   <li>The remote API returns hashed suffixes belonging to the prefix bucket with occurrence counts.</li>
+ *   <li>Match the remaining 35 hex characters locally without disclosing the complete hash over the network.</li>
  * </ol>
  *
- * <p>The server therefore learns a 5-hex-character prefix, which is one bucket
- * out of 16^5 = 1,048,576. It never receives the password and never receives the
- * full hash, so it cannot determine which password was queried. That is the
- * k-anonymity property, and it is a property of <em>this</em> endpoint only.
- *
- * <p><strong>The mistake this class exists to avoid.</strong> The original
- * project draft described checking <em>email addresses</em> "using HIBP
- * k-anonymity". There is no such thing: the breached-account endpoint takes the
- * full address. See {@link HibpAccountClient}, which is deliberately a separate
- * class so the two cannot be conflated.
- *
- * <h2>Padding</h2>
- *
- * <p>{@code Add-Padding: true} makes the API return a uniform number of lines
- * regardless of bucket, padded with entries whose count is zero. Without it, an
- * observer who can see response sizes can narrow down the queried prefix. Zero
- * counts are filtered out during parsing, which is required — a padding entry
- * must never be read as a real match.
+ * <p>Enables {@code Add-Padding: true} to ensure uniform response size across buckets, preventing
+ * side-channel prefix inference based on payload length.
  */
 @Component
 public class PwnedPasswordsClient {
@@ -65,7 +44,7 @@ public class PwnedPasswordsClient {
         this.timeoutMs = properties.lookupTimeoutMs();
         this.restClient = RestClient.builder()
                 .baseUrl(config.baseUrl())
-                .defaultHeader("User-Agent", "TrustShield-BreachMonitor/1.0 (academic project)")
+                .defaultHeader("User-Agent", "TrustShield-BreachMonitor/1.0")
                 .build();
     }
 

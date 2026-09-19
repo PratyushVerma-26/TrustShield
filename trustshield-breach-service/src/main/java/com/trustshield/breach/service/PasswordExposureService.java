@@ -29,34 +29,18 @@ import com.trustshield.common.dto.ThreatSignal;
 import com.trustshield.common.util.HashUtils;
 
 /**
- * Scores password exposure by combining breach-corpus membership with structural
- * analysis.
+ * Evaluates password exposure risk by combining external and offline breach corpus
+ * membership verification with local structural complexity analysis.
  *
- * <h2>Why the weighting here is the opposite of the phishing module's</h2>
- *
- * <p>In {@code UrlScanService} the machine-learning score is primary and
- * blacklist hits are secondary, because a blacklist tells you only that someone
- * else already caught this URL. Here the relationship inverts: <strong>corpus
- * membership is primary and structural analysis is secondary</strong>, and the
- * reason is that the two are different kinds of evidence.
- *
- * <p>A password found in a breach corpus is not a probabilistic inference about
- * risk — it is direct evidence that the exact string is already in an attacker's
- * wordlist. Structural analysis, by contrast, only predicts how a password
- * <em>might</em> fare. Prediction should not be allowed to argue with
- * observation, so a confirmed hit floors the score at
- * {@link #EXPOSED_FLOOR} regardless of how strong the password looks.
- * {@code Tr0ub4dor&3} is structurally respectable and also thoroughly burned.
- *
- * <h2>The raise-only rule, restated for this module</h2>
- *
- * <p>As with blacklists in the phishing service, breach sources here are
- * high-precision and low-recall: a hit is near-conclusive, a miss means little.
- * So a source may only ever <em>raise</em> the score. A {@code NOT_FOUND} adds a
- * zero-contribution {@code passed} signal to show the check ran, and never
- * subtracts. The bundled offline catalog goes further and reports a miss as
- * {@code UNAVAILABLE} rather than {@code NOT_FOUND}, because with a list that
- * short, absence is not information.
+ * <p>Architecture and scoring principles:
+ * <ul>
+ *   <li><strong>Corpus verification takes precedence:</strong> Verified breach occurrence
+ *       directly indicates compromise, flooring the risk score at {@link #EXPOSED_FLOOR}.</li>
+ *   <li><strong>Structural complexity:</strong> Local heuristic analysis assesses entropy and
+ *       patterns, contributing up to a capped threshold (60 points) when no breach is observed.</li>
+ *   <li><strong>Monotonic escalation:</strong> External lookups operate under raise-only semantics;
+ *       corpus misses indicate lack of observed exposure in indexed datasets rather than proof of safety.</li>
+ * </ul>
  */
 @Service
 public class PasswordExposureService {
@@ -320,14 +304,9 @@ public class PasswordExposureService {
     }
 
     /**
-     * Describes the structural findings, which are measured locally and so remain
-     * valid even when every breach source is down.
+     * Summarizes local structural findings from password entropy and pattern assessment.
      *
-     * <p>Counts only weaknesses that carry a penalty. The analyzer appends a
-     * zero-penalty {@code NONE} marker when nothing fired, so a raw
-     * {@code weaknesses().size()} reports "1 structural observation" for a password
-     * with no structural problem at all — which is what the deployed service was
-     * telling users about a 104-bit random password.
+     * <p>Filters out non-penalized baseline markers.
      */
     private static String describeStructure(StrengthAssessment strength) {
         long flagged = strength.weaknesses().stream()

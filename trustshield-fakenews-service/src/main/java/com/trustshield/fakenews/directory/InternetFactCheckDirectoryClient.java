@@ -27,7 +27,7 @@ import java.util.Set;
  * <h2>Invariant</h2>
  * <p>Absence of a record in external directories does NOT certify a claim as truthful.
  * If external sources are unreachable, the client marks {@code consulted = false}
- * ensuring the orchestrator reports honest degradation rather than a false safe verdict.
+ * ensuring the orchestrator reports degraded status rather than a false safe verdict.
  */
 @Component
 public class InternetFactCheckDirectoryClient {

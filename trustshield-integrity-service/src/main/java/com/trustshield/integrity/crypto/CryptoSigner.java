@@ -17,12 +17,8 @@ import java.util.HexFormat;
 /**
  * Asymmetric Ed25519 cryptographic signer for cumulative ledger head hashes.
  *
- * <p><strong>Viva Defense & Security Rationale:</strong>
- * A hash chain inside a database is tamper-evident against an adversary with application access,
- * but <em>not</em> against an adversary with full database write privileges (who could recompute
- * the chain). By digitally signing the head chain hash with an Ed25519 private key stored outside
- * the database, the server ensures non-repudiation: database rows cannot be altered or recomputed
- * without invalidating the external digital signature.
+ * <p>Digitally signs the cumulative head hash with an Ed25519 private key to provide
+ * cryptographic non-repudiation and external auditability beyond database-level immutability.
  */
 @Component
 public class CryptoSigner {

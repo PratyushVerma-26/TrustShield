@@ -99,21 +99,8 @@ class BreachCheckIntegrationTest {
     }
 
     /**
-     * A strong password with every source unavailable must read as unknown.
-     *
-     * <p>Both sources are unavailable here by design: the range API is disabled by
-     * default, and the offline catalog reports a miss as {@code UNAVAILABLE}
-     * because it is too small for absence to mean anything. So the honest answer
-     * is {@code INCONCLUSIVE} with {@code degraded=true} -- not a clean bill of
-     * health.
-     *
-     * <p>The {@code threatLevel} assertion is the one that matters most, and it is
-     * here because the earlier version of this test did not have it. Fixing the
-     * <em>wording</em> in the recommendation layer left {@code threatLevel} still
-     * reporting {@code SAFE}, because it was derived from a score of 0 -- so a
-     * dashboard colouring its badge from the severity band would still have shown
-     * an unchecked credential green while the sentence beside it said the check had
-     * failed. Assert on the field a UI would actually read, not only on the prose.
+     * Verifies that when all breach sources are unavailable, the verdict is reported as
+     * UNKNOWN / INCONCLUSIVE with degraded=true rather than defaulting to clean/safe.
      */
     @Test
     @DisplayName("no sources reachable yields UNKNOWN, INCONCLUSIVE and degraded, never clean")
@@ -177,13 +164,8 @@ class BreachCheckIntegrationTest {
      * prediction about how a password might fare. This password is not in the
      * bundled catalog, so nothing observed it.
      *
-     * <p>It is also the boundary case for {@code UNKNOWN}, and the reason that
-     * constant is not simply "every source was unavailable". No corpus answered
-     * here either, exactly as in {@link #unreachableSourcesAreInconclusiveNotClean}
-     * -- but structural analysis runs locally and did find something, so the score
-     * is backed by evidence and the band stays real. Reporting {@code UNKNOWN} here
-     * would discard a genuine finding and under-warn the user, which is the same
-     * class of mistake as reporting {@code SAFE} in the other case.
+     * <p>When external corpora are unreachable but local structural analysis identifies
+     * weaknesses, the score reflects observed structural evidence rather than defaulting to UNKNOWN.
      */
     @Test
     @DisplayName("structural analysis alone is capped below DANGEROUS")
@@ -308,7 +290,7 @@ class BreachCheckIntegrationTest {
 
     @Test
     @DisplayName("the privacy card distinguishes the two endpoints")
-    void privacyCardIsHonestPerEndpoint() throws Exception {
+    void privacyCardIsAccuratePerEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/breach/privacy"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.passwordCheck.kAnonymous").value(true))

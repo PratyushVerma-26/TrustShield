@@ -91,7 +91,7 @@ class PhishingScanIntegrationTest {
 
     @Test
     @DisplayName("external sources are absent by default and the verdict says so")
-    void degradesHonestlyWithoutApiKeys() throws Exception {
+    void degradesGracefullyWithoutApiKeys() throws Exception {
         JsonNode result = scan("https://example.com/");
 
         // With no keys configured, both sources should report themselves as not

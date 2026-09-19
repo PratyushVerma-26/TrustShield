@@ -13,12 +13,9 @@ import java.awt.image.BufferedImage;
  * has had its original sensor noise, PRNU, and localized compression traces destroyed by
  * multi-generation transcoding and resolution downscaling.
  *
- * <p><strong>THE HONEST FAILURE INVARIANT:</strong>
- * When an image has undergone destructive recompression, the forensic signals cannot
- * establish authenticity. In accordance with the system-wide principle —
- * <em>"an unknown result is not a safe result"</em> — the service must emit
- * {@code ThreatLevel.UNKNOWN} (score 0, degraded=true) rather than falsely reporting
- * a clean bill of health.
+ * <p>When an image has undergone destructive recompression, physical forensic signals cannot
+ * reliably establish authenticity. In such cases, the service reports {@code ThreatLevel.UNKNOWN}
+ * (score 0, degraded=true) to prevent false safe classifications.
  */
 @Component
 public class RecompressionDetector {

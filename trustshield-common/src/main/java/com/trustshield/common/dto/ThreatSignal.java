@@ -3,11 +3,9 @@ package com.trustshield.common.dto;
 /**
  * A single piece of evidence contributing to a detection verdict.
  *
- * <p>Signals are the explainability layer. Rather than returning a bare score,
- * every TrustShield module returns the list of signals that produced it, so a
- * non-technical user can be told <em>why</em> something was flagged and an
- * examiner can audit the decision. This is also what makes the system's output
- * defensible: a score with no derivation is not evidence.
+ * <p>Signals provide the explainability layer. Rather than returning a bare score,
+ * every TrustShield module returns the list of signals that produced it, providing
+ * clear attribution for users and auditable evidence for security reviews.
  *
  * @param name         short machine-readable identifier, e.g. {@code IP_LITERAL_HOST}
  * @param description  plain-language explanation shown to the end user

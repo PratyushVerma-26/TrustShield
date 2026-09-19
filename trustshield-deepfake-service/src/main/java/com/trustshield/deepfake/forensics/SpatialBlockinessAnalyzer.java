@@ -9,16 +9,10 @@ import java.awt.image.BufferedImage;
 /**
  * Spatial 8x8 blockiness periodicity analyzer.
  *
- * <p><strong>CRITICAL ARCHITECTURAL NOTICE:</strong>
- * This blockiness measure is a <em>spatial proxy</em> and is <strong>NOT</strong>
- * DCT-histogram double-compression detection. Java's standard {@code javax.imageio.ImageIO}
- * provides no access to raw DCT coefficients or internal Huffman bitstreams. Therefore,
- * this metric evaluates spatial-domain gradient discontinuities across expected 8x8 block
- * boundaries relative to intra-block gradients.
- *
- * <p>Standard JPEG compression produces periodic boundary steps at multiples of 8 pixels
- * ($x, y \equiv 7 \pmod 8$). Spliced, rescaled, rotated, or directly synthesized AI images
- * either lack this 8x8 spatial periodicity or exhibit destructive boundary phase dissonance.
+ * <p>Evaluates spatial-domain gradient discontinuities across expected 8x8 block
+ * boundaries relative to intra-block gradients as a spatial proxy metric. Standard JPEG
+ * compression produces periodic boundary steps at multiples of 8 pixels ($x, y \equiv 7 \pmod 8$).
+ * Spliced, rescaled, or synthesized images often lack this periodicity or exhibit boundary phase dissonance.
  */
 @Component
 public class SpatialBlockinessAnalyzer {

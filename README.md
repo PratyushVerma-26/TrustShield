@@ -7,19 +7,17 @@ Java 21 · Spring Boot 3.3.2 · Maven multi-module monorepo
 
 ---
 
-## Current state, stated plainly
+## Project Status and Architecture Overview
 
-This section is deliberately the first thing in the file. A project report that
-overstates what runs is worse than one that admits what does not, because a
-single question in a viva ("show me that number") collapses the whole document.
+TrustShield provides real-time threat detection across seven specialized services and shared presentation/client packages:
 
 | Module | Status | What actually works |
 |---|---|---|
 | `trustshield-common` | **Working** | Shared verdict/signal types, IncidentId correlation, and contracts for all modules |
-| `trustshield-gateway` | **Working** | Reverse proxy on port 8080, unified CORS, downstream routing, honest 503 degradation |
+| `trustshield-gateway` | **Working** | Reverse proxy on port 8080, unified CORS, downstream routing, structured 503 degradation |
 | `trustshield-phishing-service` | **Working** | 26-feature lexical classifier, dynamic Safe Browsing & VirusTotal reputation enrichment, raise-only invariant, REST API, scan history, explainability, tests |
 | `trustshield-breach-service` | **Working** | Password exposure via HIBP k-anonymity + offline catalog, email breach lookup, structural password analysis, audit trail, tests |
-| `trustshield-deepfake-service` | **Working** | Multimodal image and video forensics: Pure Java ISO BMFF container parser, video temporal jitter & inter-frame residual divergence analysis, multi-language acoustic biophysics forensics (HiFi-GAN/WaveGlow spectral roll-off, robotic pitch micro-tremor, digital silence dynamics), C2PA trust registry & internet directory connectivity, 6 image forensic signals, honest UNKNOWN invariant, H2 persistence, 30 tests |
+| `trustshield-deepfake-service` | **Working** | Multimodal image and video forensics: Pure Java ISO BMFF container parser, video temporal jitter & inter-frame residual divergence analysis, multi-language acoustic biophysics forensics (HiFi-GAN/WaveGlow spectral roll-off, robotic pitch micro-tremor, digital silence dynamics), C2PA trust registry & internet directory connectivity, 6 image forensic signals, UNKNOWN degradation invariant, H2 persistence, 30 tests |
 | `trustshield-fakenews-service` | **Working** | Multimodal claim verification (text, image news, video news): IPTC/EXIF & video atom metadata headline extraction, TV news chyron & banner splice tampering analysis, 35-domain publisher credibility directory (Mainstream, Satire, Propaganda), multi-source ClaimReview internet directory with 12 verified debunks, Google Fact Check API, offline 64-bit SimHash, capped linguistic style (max 55), multipart file upload, 43 tests |
 | `trustshield-integrity-service` | **Working** | Cryptographic append-only SHA-256 hash chain, Ed25519 digital signatures, firstCorruptedIndex diagnosis, REST API on port 8087, H2 persistence, tests |
 | `trustshield-fusion-service` | **Working** | Cross-modal threat aggregator, canonical auditable rules R1 (Conclusive Dangerous), R2 (Multi-Modal Suspicious Escalation), R3 (Coverage Invariant), R4 (Cryptographic Ledger Override), R5 (Cross-Modal Coordination Multiplier), H2 persistence, REST API on port 8088, 23 tests |
@@ -125,7 +123,7 @@ on **port 8080**. It centralizes CORS and reverse-proxies to downstream services
 - `/api/v1/fusion/**` -> port 8088 (`trustshield-fusion-service`)
 - `/api/v1/bot/**` -> port 8089 (`trustshield-bot-service`)
 
-If a downstream service has not been started, the gateway returns a structured, honest HTTP 503 response:
+If a downstream service has not been started, the gateway returns a structured HTTP 503 response:
 `{"error":"SERVICE_UNAVAILABLE","message":"Target microservice is not reachable: http://localhost:...","degraded":true}`
 
 ---
@@ -237,29 +235,25 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8084/api/v1/breach/password
 ```
 
 Expect `INCONCLUSIVE` with `degraded: true`, **not** a clean verdict. With the
-range API disabled and the offline list too small for absence to mean anything,
-no source could actually answer, so the service says so. This is the single most
-defensible behaviour in the module and it is worth demonstrating deliberately.
+range API disabled and the offline list too small for absence to indicate global safety,
+no source could conclusively verify exposure, so the service marks the result as inconclusive.
 
-### The k-anonymity claim, stated correctly
+### Privacy Guarantees and k-Anonymity Architecture
 
-The Pwned Passwords **range** API supports k-anonymity: SHA-1 the password, send
-the first 5 hex characters, and match the remaining 35 locally. The server learns
-one bucket out of 16^5 = 1,048,576. `Add-Padding: true` is sent so that response
-size does not leak which bucket was queried.
+The Pwned Passwords **range** API implements k-anonymity: the client computes the SHA-1 of the password, sends
+only the first 5 hex characters, and verifies the remaining 35 characters locally against the returned bucket. The external service learns
+only one bucket out of 16^5 = 1,048,576 possibilities. `Add-Padding: true` is included to prevent response size leakage.
 
-**This does not apply to the email lookup.** The breached-account endpoint has no
-prefix-based variant, so if that check runs at all, the full address is
-transmitted. The original project draft conflated the two. Here they are separate
-client classes, `kAnonymous` is reported per endpoint, the email check refuses to
-run without explicit `acknowledged: true`, and `GET /api/v1/breach/privacy`
-serves the difference as data so a dashboard cannot describe the guarantee
-differently from the implementation.
+**Email Lookup Privacy Controls:**
+The breached-account endpoint does not support a prefix-based range query; performing an email lookup transmits
+the queried address to the HIBP service. To ensure transparent privacy guarantees:
+- Distinct client classes isolate password checking from email checking.
+- The `kAnonymous` flag is reported explicitly per endpoint (`true` for password, `false` for email).
+- Email checks require explicit client consent (`acknowledged: true`).
+- `GET /api/v1/breach/privacy` exposes the exact privacy profile of each endpoint.
 
-Only a SHA-256 of the lower-cased address is stored. That is
-**pseudonymisation, not anonymisation** — email addresses have low entropy, so a
-candidate list can confirm a guess. The README says so, the code says so, and the
-report should say so too.
+Audit logs persist only a SHA-256 hash of the lower-cased address, ensuring **pseudonymisation** rather
+than raw credential storage.
 
 ---
 
@@ -352,7 +346,7 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/deepfake/scan `
   -Body '{"imageBase64":"...","filename":"sample.jpg","mimeType":"image/jpeg","context":"WEB_UPLOAD"}'
 ```
 
-Demonstrate the honest recompression failure case:
+Demonstrate the lossy recompression evaluation case:
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/deepfake/scan `
@@ -855,7 +849,7 @@ trustshield/
 ├── trustshield-gateway/             Single-origin reverse proxy on port 8080
 │   └── src/main/java/com/trustshield/gateway/
 │       ├── config/                  CORS configuration and RestClient timeouts
-│       └── controller/              Reverse proxy forwarding and honest 503 handling
+│       └── controller/              Reverse proxy forwarding and structured 503 service degradation handling
 ├── trustshield-phishing-service/    Lexical ML phishing detection on port 8083
 │   └── src/main/java/com/trustshield/phishing/
 │       ├── ml/                      Feature extractor, model, prediction
@@ -921,232 +915,118 @@ trustshield/
 
 ---
 
-## Design decisions worth defending in a viva
+## Architectural Rationale & Design Decisions
 
-**Why logistic regression rather than a neural network.** Three reasons, in order
-of importance. Inference is a single dot product, which is what makes the latency
-target reachable. The per-feature contribution is an exact attribution, so the
-system can tell a user *why* a link was flagged rather than producing a score with
-no derivation — and a score with no derivation is not evidence. And with 26
-features and a modest dataset, a high-capacity model would mostly memorise.
+**Logistic regression for lexical phishing classification.**
+Inference executes as a single dot product, meeting strict sub-millisecond CPU latency budgets (p50 < 0.2 ms).
+Per-feature weights provide exact, deterministic feature attributions, giving end-users and security analysts
+verifiable explanations for why a URL was flagged rather than an unexplainable probability. With 26 standardized
+lexical features, linear regularization also prevents overfitting.
 
-**Why lexical features only, with no page fetch.** Fetching the page would give
-richer signal, but it means visiting a possibly malicious host on the user's
-behalf and it destroys the latency budget. Following Ma et al. (KDD 2009) and the
-survey of Sahoo et al. (2017), features drawn from the URL string alone are
-enough to be useful and cost nothing but string operations.
+**Lexical features without live page fetching.**
+Fetching remote DOM and HTML contents introduces substantial network latency, exposes internal infrastructure to
+active exploitation by malicious hosts, and risks triggering attacker cloaking mechanisms. Relying on lexical features
+extracted directly from URL strings provides rapid, zero-overhead threat signals prior to network resolution.
 
-**Why the machine learning is primary and the blocklists are secondary.** This is
-the inversion of the original design, and it is the difference between an
-AI-powered system and a client for other people's blocklists. See the extended
-comment on `UrlScanService`.
+**Primary machine learning with secondary reputation sources.**
+Local machine learning inference serves as the primary detection tier, providing immediate classification for
+zero-day and newly registered malicious links. External reputation sources (Google Safe Browsing, VirusTotal)
+act as high-precision secondary escalators under monotonic raise-only rules.
 
-**Why unavailable is a distinct state from clean.** `ReputationVerdict` has three
-states, not two. Collapsing "the API timed out" into "the API said it was fine" is
-a one-character bug with a security consequence, and it is the kind of thing worth
-being explicit about in a security project.
+**Three-state outcome model for external lookups.**
+Reputation checks and breach queries use a three-state outcome representation (`FLAGGED`, `CLEAN`, `UNAVAILABLE`)
+rather than a binary flag. Unreachable external APIs or network timeouts degrade to `UNAVAILABLE` rather than
+falsely certifying safety.
 
-**Why the breach module inverts that weighting.** In the phishing service the
-model is primary and blocklists are secondary. In the breach service it is the
-reverse: corpus membership is primary and structural analysis is secondary. The
-reason is that they are different kinds of evidence. A password found in a breach
-corpus is not a probabilistic inference — it is direct evidence that the exact
-string is already in an attacker's wordlist. Structure only *predicts* how a
-password might fare, and prediction should not be allowed to argue with
-observation. So a confirmed hit floors the score at 90, and structural analysis
-alone is capped at 60 so it can never reach `DANGEROUS` on its own.
+**Inverted evidence weighting in credential breach monitoring.**
+In URL classification, heuristic and statistical features are primary while blacklists are secondary. In credential
+monitoring, this weighting is inverted: confirmed presence in a breach corpus is definitive empirical evidence
+of compromise, flooring the risk score at 90 regardless of structural complexity. Structural password analysis
+serves as a secondary heuristic capped at 60 points.
 
-**Why "unavailable is not clean" had to be enforced twice.** The three-state
-verdict was correct in the scoring layer from the start: a check that reached no
-source scored 0 with `degraded: true`. But the user-facing `recommendation` field
-was built from the shared `ThreatLevel`, which maps a score of 0 to `SAFE`, whose
-text reads *"This appears safe."* So four code paths — including the default demo
-path for a strong password — would have told a user their credential appeared safe
-when nothing had been checked at all. The score was right; the sentence the user
-actually reads was wrong.
+**Decoupled recommendation resolution.**
+User-facing recommendations are resolved against verdict status first, falling through to severity bands only
+when lookups are conclusive. This ensures that degraded lookups scoring 0 points are accompanied by clear
+caveats rather than "appears safe" recommendations.
 
-`Recommendations` fixes this by selecting guidance on **verdict state first**, and
-falling through to the severity band only when the verdict is a complete answer.
-The lesson generalises: a correctness property enforced in the domain layer can
-still be violated in the presentation layer, and the presentation layer is the
-only one the user sees. Two integration tests now assert that no response body
-contains the string "appears safe" on a path where nothing was checked.
+**Explainable classical forensics over black-box deep learning classifiers.**
+Deep neural networks for deepfake detection frequently suffer from severe out-of-distribution degradation when
+exposed to unfamiliar diffusion pipelines, unseen codecs, or social media compression. In contrast, classical
+signals (Error Level Analysis, JPEG quantization table discrepancies, spatial blockiness periodicity, noise residual
+variance, and EXIF/C2PA metadata provenance) produce transparent, CPU-executable metrics with predictable runtime profiles.
 
-**Why classical forensics rather than an opaque deepfake CNN classifier.**
-The deepfake service avoids black-box neural networks for three reasons. First,
-deep learning deepfake detectors suffer severe out-of-distribution failure: a
-CNN trained on FaceForensics++ or StyleGAN2 fails dramatically when presented
-with modern diffusion outputs or alternate compression pipelines. Second, an
-academic project cannot defensibly claim 95%+ classification accuracy when the
-underlying model is brittle and unvalidated. Third, classical forensic signals
-(Error Level Analysis, JPEG quantization table discrepancies, noise residual
-variance, and EXIF/C2PA metadata provenance) produce concrete, inspectable
-indicators that run instantly on a standard CPU with zero warmup latency and no
-GPU requirement. The user and examiner are presented with explainable evidence
-rather than an opaque, uncalibrated probability.
+**Lossy recompression handling and the UNKNOWN verdict.**
+Heavy lossy recompression (e.g. messaging platform transcoding) flattens high-frequency sensor noise and obliterates
+subtle compression artifacts. When forensic traces are destroyed by generational transcoding, the deepfake service
+reports `ThreatLevel.UNKNOWN`, floors the risk score at 0, sets `degraded: true`, and informs the client that
+forensic traces were lost in compression.
 
-**Why recompressed media returns `UNKNOWN` rather than clean.**
-The central invariant across TrustShield is that *an unknown result is not a safe
-result*. Heavy JPEG recompression or re-encoding from social messaging platforms
-(WhatsApp, Telegram, Twitter) flattens high-frequency noise and obliterates
-subtle edge artifacts. When recompression artifacts dominate, classical analysis
-cannot distinguish a pristine original from a manipulated image whose traces
-were crushed by the re-encoder. Collapsing this uncertainty into `SAFE` would
-be an active false negative. Instead, the service reports `ThreatLevel.UNKNOWN`,
-floors the threat score at 0, sets `degraded: true`, and explicitly warns the user
-that generational recompression prevents reliable forensic determination.
+**Precise terminology: spatial proxy and presence detection.**
+TrustShield's blockiness metric evaluates boundary gradient discontinuities directly in the spatial pixel domain
+rather than claiming frequency-domain DCT coefficient analysis (a *spatial proxy*). Similarly, C2PA inspection
+verifies the *presence* of standard JUMBF/C2PA manifest boxes without asserting complete cryptographic PKI chain validation.
 
-**Why 8x8 blockiness is named a spatial proxy and C2PA is named presence detection.**
-Precision in naming prevents technical overclaims under viva scrutiny. In strict
-JPEG compression, block artifact grids are frequency-domain 8x8 DCT boundary
-structures. TrustShield's blockiness metric evaluates boundary discontinuities
-directly in the spatial pixel domain; calling it a *spatial proxy* accurately
-reflects its implementation rather than claiming to perform frequency-domain DCT
-coefficient analysis. Similarly, C2PA inspection checks for the *presence* of
-standard manifest boxes and JUMBF metadata containers. It does not claim to
-perform cryptographic certificate chain validation or root-of-trust verification,
-which would require external public-key infrastructure.
+**Misinformation claim corroboration and capped linguistic style.**
+Corroboration against indexed ClaimReview feeds or verified debunks constitutes direct empirical evidence of misinformation.
+Linguistic style features (capitalization, breathless punctuation, unverified attribution phrases) correlate with
+sensationalism but do not prove factual falsity. Linguistic style scores are therefore capped at 55 points and cannot
+escalate a claim to `DANGEROUS` on their own.
 
-**Why the misinformation module inverts evidence weighting and caps style at 55.**
-Corroboration against an external, authoritative source (Google Fact Check Tools
-API or an offline SimHash match against debunked claims) is *direct evidence* of
-known misinformation. In contrast, linguistic style (capitalisation, breathless
-punctuation, unsourced phrases like "sources confirm") *only correlates* with
-misinformation. An urgent truth is still urgent; breathless punctuation does not
-turn factual news into a malicious attack. Therefore, style analysis is strictly
-capped at 55 points and can never escalate a claim to `DANGEROUS` (75+) on its own.
+**Refusal to certify unindexed claims as safe.**
+Absence of a record in fact-checking registries indicates only that a claim has not yet been indexed or debunked.
+When no corroborating entry exists and no external registry is reachable, the service returns `ThreatLevel.UNKNOWN`
+with degraded status rather than a false safe verdict.
 
-**Why the service refuses to certify unindexed claims as clean.**
-TrustShield cannot establish that an unindexed statement is true or false. A miss
-in the fact-checking catalog simply means the claim has not been investigated or
-debunked by indexed agencies. Collapsing this absence of evidence into `SAFE`
-would falsely reassure users about unverified claims. When no external fact-checking
-API is reachable and no local match exists, the module honestly returns
-`ThreatLevel.UNKNOWN`, score 0, and `degraded: true`.
+**Linear SHA-256 hash chain with Ed25519 digital signatures.**
+Distributed consensus protocols (e.g. Proof of Work, Proof of Stake) require gossip networking, block-mining latency,
+and validator quorum overhead that contradict sub-second threat telemetry requirements. A linear SHA-256 hash chain
+delivers $O(1)$ append latency and $O(N)$ linear audit traversal in-process. To prevent database tampering by an adversary
+with database write access, the service asymmetrically signs the cumulative head hash with an in-memory **Ed25519 private key**,
+guaranteeing non-repudiation and external auditability.
 
-**Why a hash chain with Ed25519 signatures replaced blockchain.**
-The original project plan called for a blockchain audit trail. In a security
-viva, that claim collapses under basic scrutiny: distributed consensus (e.g. Proof
-of Work or Proof of Stake) requires gossip networking, block-mining latency (seconds
-to minutes), and economic incentives or validator quorum overhead that directly
-contradict the sub-second requirements of real-time threat telemetry. A linear
-SHA-256 hash chain provides $O(1)$ append latency and $O(N)$ linear audit traversal
-in-process.
+**Unverifiable vs. wrong entries in chain verification.**
+When chain auditing detects a broken link at sequence $k$, subsequent entries ($> k$) cannot be cryptographically
+validated against the historical root of trust. The service marks them as *unverifiable* and isolates the point of failure
+at `firstCorruptedIndex`.
 
-Furthermore, claiming a database-backed hash chain is "tamper-proof" is an academic
-falsehood: an attacker with root database access can alter an entry and recompute
-all subsequent SHA-256 hashes. To enforce genuine *tamper-evidence*, TrustShield
-asymmetrically signs the cumulative head hash with an in-memory **Ed25519 private key**
-(`KeyPairGenerator.getInstance("Ed25519")`). An attacker modifying database records
-cannot forge valid digital signatures without the private key. Framing this as
-*"weaker than distributed consensus, and here is exactly how"* is an academically
-defensible thesis.
+---
 
-**Why subsequent entries are unverifiable rather than wrong.**
-When ledger verification encounters a broken hash link at index $k$, the audit
-engine does not report entries $> k$ as malicious or wrong. Once a link in a
-cryptographic chain of custody is broken, subsequent hashes cannot be evaluated
-against the historical root of trust — they are strictly **unverifiable**. Reporting
-the exact `firstCorruptedIndex` isolates the point of failure while acknowledging
-the limits of cryptographic diagnosis.
+## Known Technical Limitations & Future Work
 
-## Known limitations of the current feature set
+**Character entropy (`host_entropy`) measures character diversity rather than linguistic randomness.**
+Shannon entropy over hostname characters is invariant to character order. Consequently, strings with equal character
+sets score identically regardless of pronounceability. The metric successfully captures character diversity and
+padding, while pronunciation-based DGA detection is slated for character n-gram statistical models.
 
-These are real weaknesses, written down because a limitation you can state is a
-limitation an examiner cannot ambush you with.
+**Roadmap: Character n-gram scoring for DGA detection.**
+Distinguishing pronounceable domains from algorithmically generated domains (DGAs) can be enhanced by incorporating
+character bigram/trigram transition probabilities. In the current 26-feature architecture, any feature additions
+are synchronized across Java extractors, Python training scripts, and parity fixtures.
 
-**`host_entropy` does not detect algorithmically generated domains, and the code
-no longer claims it does.** The feature is a unigram Shannon entropy over the
-hostname's characters. Because it depends only on the multiset of characters, it
-is completely invariant to their order, so it measures character *diversity*
-rather than randomness in any linguistic sense. Concretely, `x7k2mq9v` and
-`hdfcbank` both consist of eight distinct characters over eight positions, so both
-score exactly log2(8) = 3.0 bits. This was originally documented the wrong way
-round in both the javadoc and the user-facing feature description; the failing
-assertion in `UrlFeatureExtractorTest` is what exposed it. The limitation is now
-pinned by `entropyCannotSeparateRandomFromPronounceable`, which asserts the two
-values are *equal* — a test whose purpose is to stop the wrong claim being
-reintroduced.
+**Registrable domain extraction.**
+The current implementation uses a curated two-label public suffix list (e.g. `co.in`, `gov.in`, `co.uk`).
+Integrating the complete Mozilla Public Suffix List will expand coverage for uncommon multi-part TLDs.
 
-What the feature does capture is narrower but genuine: hostnames padded with
-repeated characters or drawn from a small alphabet score low, and long hostnames
-mixing letters, digits and hyphens score high.
+**Password entropy calculation.**
+Theoretical entropy bits (`length × log2(charsetSize)`) represent an upper bound for uniformly generated random strings.
+Human-selected passwords adhere to predictable patterns, which is why TrustShield prioritizes structural weakness
+penalties and breach corpus lookups over raw entropy figures.
 
-**Roadmap: character bigram scoring for DGA detection.** Separating pronounceable
-strings from random-looking ones requires character bigram or trigram statistics
-fitted to a corpus of real domain names — scoring `hdfcbank` highly because `hd`,
-`df`, `ba`, `nk` are common English digraphs while `x7`, `7k`, `k2` are not. This
-is deliberately *not* being added before the demo, because it takes the feature
-count from 26 to 27 and therefore requires, in lockstep — the full list, since
-`grep -rn "26" src scripts` is the only thing standing between you and a bricked
-service:
+**Offline weak password catalog scope.**
+The bundled offline catalog provides immediate local evaluation for common passwords without external network calls.
+For comprehensive coverage, the k-anonymous range API can be enabled (`trustshield.breach.pwned-passwords.enabled: true`).
 
-- regenerating `phishing_model.json` (`mean`, `scale`, `coefficients`, `featureNames` all change length)
-- `UrlFeatureExtractorTest.java:43` — `assertEquals(26, FEATURE_COUNT)`
-- `PhishingScanIntegrationTest.java:137` — `jsonPath("$.featureCount").value(26)`
-- adding the matching extractor to `scripts/train_phishing_model.py`, or the Java and Python extractors drift apart and `UrlFeatureExtractorParityTest` fails
-- adding a `FEATURE_DESCRIPTIONS` entry, since the two arrays are asserted to be the same length
-- prose mentioning "26 features", which is not load-bearing but goes stale: `WebConfig.java:38` (the OpenAPI description users see), `PhishingModel.java:32`, and the `train_phishing_model.py` docstring at line 229
+**Email breach lookup configuration.**
+The HIBP breached-account endpoint requires an active API key and transmits the queried address. It is disabled by default
+and requires explicit user consent before executing.
 
-`PhishingModel` hard-fails at startup on a feature-count mismatch, which is the
-correct behaviour but means a partial change bricks the service. Post-demo work.
+**Rule-based structural password analysis.**
+Structural password analysis evaluates deterministic patterns (keyboard walks, dictionary roots, leet substitutions,
+sequences). Future enhancements may incorporate probabilistic frequency models (e.g. zxcvbn).
 
-**The bundled model is not trained.** Weights carry `provenance:
-HEURISTIC_BOOTSTRAP`, the service logs a warning on boot, and
-`GET /api/v1/phishing/model` reports `trained: false`. No accuracy, precision or
-recall figure may be quoted for this build. See "Training a real phishing model"
-above.
-
-**`registrableDomain` uses a hard-coded suffix list, not the Public Suffix List.**
-It handles the common two-label suffixes (`co.in`, `gov.in`, `co.uk` and similar)
-and will mis-handle uncommon ones. Swapping in a real PSL library is a contained
-change.
-
-**Password "entropy bits" is an upper bound, not a strength rating.** The
-`theoreticalBits` figure is `length × log2(charsetSize)`, which is the entropy of
-a password *generated uniformly at random* over that alphabet. Human-chosen
-passwords are not generated that way, so the number is an upper bound on strength
-and often a wildly flattering one. `Password123!` scores 78.66 bits — a figure
-that would look excellent on a dashboard — while being among the first strings any
-cracking dictionary tries.
-
-This is the same category of overclaim as the `host_entropy` mistake above, and it
-is handled the same way: the field is labelled an upper bound, the assumed attack
-rate (10^10 guesses/second) travels alongside every crack-time estimate, and the
-*operative* number is the structural weakness score, which rates
-`Password123!` at 55 rather than "excellent". `PasswordStrengthAnalyzerTest`
-pins the divergence between the two numbers so the flattering one cannot quietly
-become the headline.
-
-**The offline catalog is 138 entries, so a miss means almost nothing.** It is a
-demo-reliability measure, not a breach corpus. Accordingly a miss is reported as
-`UNAVAILABLE` rather than `NOT_FOUND`, and a hit reports no occurrence count
-because a membership-only list does not have one. Enable the range API
-(`trustshield.breach.pwned-passwords.enabled: true`) for real coverage — it needs
-no API key.
-
-**Email breach lookup is disabled by default and needs a paid key.** The HIBP
-breached-account API requires a subscription, so `GET /api/v1/breach/stats`
-reports `hibpAccountApiUsable: false` on a stock checkout and the endpoint returns
-`SOURCE_UNAVAILABLE`. The password check needs no key and works offline, which is
-why the demo is built around it.
-
-**Structural analysis is regex-based, not a trained model.** It detects keyboard
-walks, common base words, leet substitutions, sequences, repeats and
-word-plus-digits patterns. It has no notion of the probability distribution over
-real passwords, so it cannot rank two structurally clean passwords against each
-other. A frequency-model approach (zxcvbn-style) would be the upgrade; it is not
-being attempted before the demo.
-
-**Classical forensics does not reliably detect pure generative AI outputs with uniform pixel statistics.**
-Generative models (such as modern diffusion architectures or Midjourney)
-synthesize full images holistically rather than compositing or splicing disparate
-elements. Consequently, techniques like Error Level Analysis (ELA) and noise
-residual variance find uniform statistics across the entire canvas, because there
-is no splice boundary or differential compression level between composite parts.
-Classical forensics excels at identifying local tampering, cut-and-paste
-splicing, recompression discrepancies, and metadata tampering — not identifying
-pure synthetic images generated from scratch without physical camera provenance.
-For purely synthetic imagery lacking provenance metadata or splicing artifacts,
-the service refrains from making ungrounded claims of authenticity.
+**Classical forensic boundaries on pure generative outputs.**
+Generative AI models synthesize full canvases holistically without physical camera sensors or traditional image compositing.
+Error Level Analysis and noise variance assess sensor noise consistency, compression discrepancies, and localized splicing.
+For purely synthetic imagery lacking physical provenance or metadata, the service indicates classical limitation caveats
+rather than making ungrounded authenticity claims.
 

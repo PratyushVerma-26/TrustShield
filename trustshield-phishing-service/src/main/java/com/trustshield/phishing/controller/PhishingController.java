@@ -64,10 +64,8 @@ public class PhishingController {
 
     @GetMapping("/model")
     @Operation(summary = "Model card",
-            description = "Model identity, feature list, and an explicit statement of "
-                    + "whether the loaded weights were trained on real data. Exposed "
-                    + "so no consumer of this API can mistake bootstrap weights for a "
-                    + "trained classifier.")
+            description = "Model identity, feature list, and metadata indicating "
+                    + "whether loaded weights were trained on real data.")
     public ResponseEntity<Map<String, Object>> modelCard() {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("version", model.getModelVersion());

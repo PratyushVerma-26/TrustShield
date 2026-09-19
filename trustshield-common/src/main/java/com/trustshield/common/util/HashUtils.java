@@ -5,13 +5,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Hashing helpers shared across services.
+ * Cryptographic hashing utilities shared across TrustShield services.
  *
- * <p>Deliberately uses {@link MessageDigest} from the JDK rather than an external
- * crypto library. Note that the original project draft used
- * {@code javax.xml.bind.DatatypeConverter} for hex conversion; that class was
- * removed from the JDK in Java 11 and will not compile on Java 21, so hex
- * encoding is implemented directly here.
+ * <p>Provides standard SHA-256 and SHA-1 digest computations using JDK message digests.
  */
 public final class HashUtils {
 
@@ -31,12 +27,7 @@ public final class HashUtils {
     }
 
     /**
-     * Upper-case hex SHA-1, required by the Have I Been Pwned range API.
-     *
-     * <p>SHA-1 is used here because the HIBP k-anonymity protocol mandates it,
-     * not because it was selected as a secure hash. It is never used for
-     * integrity or authentication anywhere in TrustShield. The range API also
-     * requires upper-case hex specifically.
+     * Upper-case hex SHA-1 digest, required by the Have I Been Pwned k-anonymity protocol.
      */
     public static String sha1HexUpper(String input) {
         return toHex(digest("SHA-1", input.getBytes(StandardCharsets.UTF_8))).toUpperCase();

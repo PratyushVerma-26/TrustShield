@@ -53,7 +53,7 @@ export const LedgerPanel: React.FC<Props> = ({ client }) => {
       setVerifyResult(res);
       setSimulatedCorruptedIndex(res.firstCorruptedIndex);
     } catch (err: unknown) {
-      // In offline or standalone mode, simulate honest verification
+      // In offline or standalone mode, simulate local ledger verification
       setVerifyResult({
         valid: simulatedCorruptedIndex === null,
         totalEntries: simulatedEntries.length,

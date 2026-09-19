@@ -50,7 +50,7 @@ class GatewayApplicationTest {
     }
 
     @Test
-    void unreachableDownstreamReturnsHonest503() throws Exception {
+    void unreachableDownstreamReturns503() throws Exception {
         // Ports 8085 (deepfake) isn't running in test context, proxy should return 503 degraded
         mockMvc.perform(post("/api/v1/deepfake/scan")
                         .contentType(MediaType.APPLICATION_JSON)

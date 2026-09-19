@@ -14,22 +14,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Turns exceptions into stable JSON.
+ * Global exception handler providing standardized error responses.
  *
- * <p>This is a near-copy of the phishing service's handler with one extra
- * concern, and the difference is the reason it is not simply shared: the request
- * bodies here contain secrets.
- *
- * <p>Spring's default validation error rendering includes the
- * <em>rejected value</em> for a failed field. On a phishing scan that is a URL,
- * which is unwelcome in a log but survivable. Here it would be a password. So
- * {@link #handleValidation} reports the field name and the constraint message
- * only, and additionally drops any message that happens to contain the rejected
- * value — a belt-and-braces guard against a future custom constraint whose
- * message interpolates {@code ${validatedValue}}.
- *
- * <p>As in the phishing service, stack traces and internal exception messages are
- * never returned to the caller.
+ * <p>Sanitizes error output to prevent credential or sensitive parameter leakage:
+ * <ul>
+ *   <li>Validation messages strip rejected values so passwords are never logged or returned.</li>
+ *   <li>Internal exception details and stack traces are suppressed from client responses.</li>
+ * </ul>
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,13 +37,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Returns the constraint message, unless it contains the rejected value.
-     *
-     * <p>Standard Bean Validation messages ("must not be blank", "size must be
-     * between 0 and 256") never embed the value, so in practice this passes them
-     * through unchanged. The check exists so that adding a constraint whose
-     * message does embed the value cannot quietly turn a validation error into a
-     * password disclosure.
+     * Sanitizes constraint messages by filtering out any occurrence of rejected values.
      */
     private static String safeMessage(String message, Object rejectedValue) {
         if (message == null || message.isBlank()) {

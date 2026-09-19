@@ -27,8 +27,8 @@ import java.util.Set;
  *
  * <p>Implements the single origin pattern. Rather than the React console or mobile app
  * juggling seven ports (8083-8089) and multiple CORS origins, all traffic flows through
- * port 8080. If a downstream service is down or not yet started, the proxy returns a
- * structured, honest 503 rather than failing abruptly.
+ * port 8080. If a downstream service is down or unreachable, the proxy returns a
+ * structured 503 Service Unavailable response rather than failing abruptly.
  */
 @RestController
 public class GatewayProxyController {

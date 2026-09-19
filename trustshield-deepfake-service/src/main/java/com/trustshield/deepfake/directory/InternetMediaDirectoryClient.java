@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Client for internet media verification directories and C2PA trust registries.
  *
- * <p>Enforces the project-wide honest degradation invariant:
+ * <p>Implements graceful degradation and offline fallback:
  * <ul>
  *   <li>Offline by default with zero network dependency.</li>
  *   <li>When enabled via configuration, queries remote media registries or C2PA trust list endpoints.</li>

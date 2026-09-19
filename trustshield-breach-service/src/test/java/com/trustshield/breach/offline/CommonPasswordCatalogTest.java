@@ -13,12 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests for the bundled offline catalog.
+ * Tests for the bundled offline weak password catalog.
  *
- * <p>Two of these assertions are about honesty rather than correctness, and both
- * would pass just as happily if the class lied. They are here because the lies
- * are tempting: inventing an occurrence count makes the UI look richer, and
- * reporting a miss as {@code NOT_FOUND} makes the verdict look more confident.
+ * <p>Validates catalog loading, set membership verification, exact hashing,
+ * and contract invariants (such as non-fabrication of counts and graceful unavailability).
  */
 class CommonPasswordCatalogTest {
 

@@ -9,12 +9,8 @@ import java.nio.charset.StandardCharsets;
 /**
  * Coalition for Content Provenance and Authenticity (C2PA) manifest presence detector.
  *
- * <p><strong>CRITICAL ARCHITECTURAL NOTICE:</strong>
- * This detector performs <em>presence detection only</em>, and does <strong>NOT</strong>
- * execute full cryptographic signature validation. Detecting the presence of a C2PA manifest
- * provides important provenance context indicating the media embeds Content Authenticity
- * Initiative / JUMBF metadata boxes. Verifying full X.509 certificate chains, trust lists,
- * and manifest hash integrity is a separate, extensive public-key infrastructure operation.
+ * <p>Inspects binary media payloads for C2PA and JUMBF metadata markers to provide
+ * provenance context indicating Content Authenticity Initiative metadata.
  */
 @Component
 public class C2paManifestDetector {

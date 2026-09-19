@@ -17,9 +17,8 @@ import java.io.ByteArrayOutputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Pins the core system invariant:
- * A recompressed image has had its forensic traces destroyed, so the honest
- * verdict must be UNKNOWN (score 0, degraded=true), never a false claim of safety.
+ * Verifies that when lossy recompression destroys physical forensic artifacts,
+ * the verdict degrades to UNKNOWN (score 0, degraded=true) to prevent false safe classifications.
  */
 class RecompressionFailureTest {
 

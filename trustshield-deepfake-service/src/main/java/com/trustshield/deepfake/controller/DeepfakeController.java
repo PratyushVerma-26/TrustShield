@@ -74,7 +74,7 @@ public class DeepfakeController {
     }
 
     @GetMapping(value = "/forensics/info", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Forensic signals and limitation disclosure", description = "Explains the six offline signals and provides honest disclosure regarding classical forensics limitations.")
+    @Operation(summary = "Forensic signals and limitation disclosure", description = "Explains the offline forensic signals and provides technical disclosures regarding classical forensics limitations.")
     public ResponseEntity<Map<String, Object>> forensicsInfo() {
         return ResponseEntity.ok(Map.of(
                 "module", "trustshield-deepfake-service",
@@ -92,7 +92,7 @@ public class DeepfakeController {
                         Map.of("name", "Internet Media Verification Directory", "technique", "Cross-checks media SHA-256 against C2PA trust registries and known debunked synthetic media catalogs.")
                 ),
                 "honestLimitations", Map.of(
-                        "recompressionHandling", "Lossy recompression or downscaling (e.g. WhatsApp photos) destroys forensic traces; honest verdict returned is UNKNOWN.",
+                        "recompressionHandling", "Lossy recompression or downscaling (e.g. WhatsApp photos) destroys forensic traces; verdict returned is UNKNOWN.",
                         "generativeAiCaveat", "Classical forensics inspects physical compression and camera sensor traces; it cannot reliably detect modern generative AI outputs that synthesize uniform pixel statistics."
                 )
         ));

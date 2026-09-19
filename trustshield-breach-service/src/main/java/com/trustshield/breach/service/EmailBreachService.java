@@ -21,27 +21,17 @@ import com.trustshield.common.dto.ThreatSignal;
 import com.trustshield.common.util.HashUtils;
 
 /**
- * Email breach lookup, with the privacy cost made explicit at every step.
+ * Service managing email breach lookups with explicit user consent and privacy controls.
  *
- * <p>This service exists partly to demonstrate a design principle: when an
- * operation cannot be done privately, the correct response is to say so and to
- * require consent, not to do it quietly. Three mechanisms enforce that here:
- *
+ * <p>Operational safeguards:
  * <ol>
- *   <li>{@link EmailCheckRequest#acknowledged()} must be true. Without it the
- *       lookup is refused before any network call — consent is a precondition in
- *       code, not a checkbox the backend ignores.</li>
- *   <li>{@code kAnonymous=false} is reported on every response, so a client
- *       cannot present this as equivalent to the password check.</li>
- *   <li>Only a SHA-256 of the address is persisted. See
- *       {@code BreachCheckRecord} for why that is pseudonymisation rather than
- *       anonymisation.</li>
+ *   <li>Requires {@link EmailCheckRequest#acknowledged()} to be {@code true} before dispatching external queries.</li>
+ *   <li>Reports {@code kAnonymous=false} across all responses to indicate direct external API interaction.</li>
+ *   <li>Persists only pseudonymized SHA-256 hashes of queried email addresses for audit logging.</li>
  * </ol>
  *
- * <p>Risk scoring is intentionally simple: the number and sensitivity of breaches
- * reported by the source. Nothing is inferred beyond what the source stated, and
- * when the source is unavailable the verdict is degraded with a score of zero
- * rather than a guess.
+ * <p>Scoring reflects the volume and sensitivity of confirmed breaches reported by external sources.
+ * If sources are unreachable, the verdict degrades with an inconclusive status.
  */
 @Service
 public class EmailBreachService {

@@ -1,17 +1,11 @@
 package com.trustshield.phishing.reputation;
 
 /**
- * An external URL reputation provider.
+ * Contract for external URL reputation providers.
  *
- * <p>Implementations must never throw: a failing third-party API must degrade the
- * verdict, not fail the user's request. Return
- * {@link ReputationVerdict#unavailable} instead.
- *
- * <p>On PhishTank: the original project design listed PhishTank as a live API
- * source. PhishTank stopped issuing new developer API keys, so relying on it at
- * runtime is not dependable. It is used here as an offline <em>training data</em>
- * source (see scripts/train_phishing_model.py) rather than a live lookup, which
- * is both more honest and more reliable.
+ * <p>Implementations query reputation data within the caller's timeout budget
+ * and return {@link ReputationVerdict#unavailable} on upstream network failure
+ * rather than throwing unhandled exceptions.
  */
 public interface ReputationSource {
 

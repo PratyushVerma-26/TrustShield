@@ -3,20 +3,16 @@ package com.trustshield.breach.hibp;
 import java.util.Optional;
 
 /**
- * Outcome of a breach-corpus lookup.
+ * Outcome of a credential breach lookup.
  *
- * <p>Three states, not two — the same reasoning as {@code ReputationVerdict} in
- * the phishing service. Collapsing "the lookup failed" into "the password is
- * clean" is a one-character bug with a direct security consequence: it would
- * tell a user their breached password is safe because a network call timed out.
+ * <p>Represents lookup outcomes using a three-state model (EXPOSED, NOT_FOUND,
+ * UNAVAILABLE) to differentiate between verified negative findings and network
+ * or lookup failures.
  *
- * @param status         what actually happened
- * @param occurrences    how many times the secret appears in the corpus, when the
- *                       source reports a count. Empty when the source only
- *                       reports membership (the offline catalog) or when the
- *                       lookup did not succeed.
- * @param source         which source answered, for attribution in the UI
- * @param detail         human-readable note, used mainly for failure reasons
+ * @param status         outcome status
+ * @param occurrences    frequency of the secret in the corpus, when reported by the source
+ * @param source         identifier of the reporting source
+ * @param detail         human-readable explanation of the outcome
  */
 public record BreachLookupResult(
         Status status,
@@ -30,7 +26,7 @@ public record BreachLookupResult(
         EXPOSED,
         /** The lookup completed and the secret was not present. */
         NOT_FOUND,
-        /** The lookup could not be completed. Absence of evidence, not evidence of absence. */
+        /** The lookup could not be completed (e.g. network timeout or service disabled). */
         UNAVAILABLE
     }
 
@@ -40,11 +36,7 @@ public record BreachLookupResult(
     }
 
     /**
-     * Found, but the source does not report a count.
-     *
-     * <p>Used by the offline catalog. It must not invent a number: reporting
-     * "appears 3,000,000 times" from a source that only knows membership would
-     * be a fabricated statistic.
+     * Found, but the source reports set membership only without frequency counts.
      */
     public static BreachLookupResult exposedCountUnknown(String source) {
         return new BreachLookupResult(Status.EXPOSED, Optional.empty(), source,

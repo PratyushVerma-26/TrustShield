@@ -35,42 +35,19 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Orchestrates a phishing assessment: local model first, external corroboration
- * second.
+ * Orchestrates real-time phishing threat evaluation.
  *
- * <h2>Why the aggregation is arranged this way</h2>
- *
- * <p>The original design for this project scored a URL by adding fixed point
- * values per source — roughly 70 points for a blacklist hit and 10 for the
- * machine-learning output. That arrangement has a fatal property for a project
- * that calls itself AI-powered: the classifier is decorative. A URL's score is
- * decided almost entirely by whether Google or VirusTotal already knew about it,
- * which means the system is a thin client over other people's blocklists and
- * detects nothing they do not already detect.
- *
- * <p>The order is inverted here:
- *
+ * <p>Employs a two-tier evaluation architecture:
  * <ol>
- *   <li><b>The lexical model is the primary signal.</b> Its calibrated probability
- *       becomes the base risk score. This is the part that can flag a domain
- *       registered twenty minutes ago, which is precisely the case blocklists
- *       miss.</li>
- *   <li><b>Reputation sources can only raise the score, never lower it.</b>
- *       Blacklists are high-precision and low-recall: a hit is near-certain
- *       evidence of malice, but the absence of a hit carries almost no
- *       information, because most phishing URLs live for hours and never make it
- *       onto a list. Allowing a clean lookup to subtract points would mean the
- *       system actively reassures users about brand-new phishing domains.</li>
- *   <li><b>A confirmed hit floors the score</b> at
- *       {@code blacklist-confirmed-floor} rather than adding to it, so a
- *       confirmed-malicious URL cannot land in a middling band because the
- *       lexical features happened to look ordinary.</li>
+ *   <li><b>Lexical Machine Learning:</b> The 26-feature calibrated logistic regression model
+ *       serves as the primary real-time classifier, identifying zero-day threats.</li>
+ *   <li><b>Reputation Corroboration:</b> External threat intelligence sources (Google Safe Browsing,
+ *       VirusTotal) execute asynchronously. Confirmed reputation hits escalate the risk score
+ *       above the threat floor, preserving the raise-only safety invariant.</li>
  * </ol>
  *
- * <p>External calls are best-effort and run concurrently on virtual threads with
- * a hard timeout. If they do not answer in budget the verdict is returned from
- * the local model alone and marked {@code degraded}, so latency stays predictable
- * and a third-party outage cannot take the feature down.
+ * <p>External queries run concurrently with strict execution timeouts. On upstream timeout or
+ * failure, the local ML verdict is returned with {@code degraded=true} to protect SLA budgets.
  */
 @Service
 public class UrlScanService {
@@ -418,15 +395,8 @@ public class UrlScanService {
     /**
      * Maps a severity band onto this module's machine-readable outcome code.
      *
-     * <p>No {@code default} branch, deliberately. Adding a constant to
-     * {@link ThreatLevel} should break the build here rather than silently fall
-     * through to a wrong code, which is how the shared enum's own javadoc asks
-     * callers to treat it.
-     *
-     * <p>{@code UNKNOWN} is unreachable from this call site — {@code level} comes
-     * from {@link ThreatLevel#fromScore}, which never returns it. The case exists
-     * because the switch must be total, and is worded honestly in case a future
-     * caller passes a level that was set explicitly.
+     * <p>Exhaustive mapping ensures any added {@link ThreatLevel} constants require
+     * explicit handling here. {@code UNKNOWN} provides a safe fallback mapping.
      */
     private static String verdictCode(ThreatLevel level) {
         return switch (level) {

@@ -3,10 +3,9 @@ package com.trustshield.phishing.reputation;
 /**
  * Result of consulting one external reputation source.
  *
- * <p>Note the three-state design: {@code available=false} means the source could
- * not be reached or has no opinion, which is deliberately distinct from
- * "reached it and it said clean". Collapsing those two into a boolean is a
- * common and dangerous bug — an API timeout would read as a clean verdict.
+ * <p>Implements a three-state outcome model: {@code available=false} indicates the source could
+ * not be reached or returned no data, distinct from a verified clean finding.
+ * This prevents API timeouts from being conflated with clean verdicts.
  *
  * @param source    identifier, e.g. {@code GOOGLE_SAFE_BROWSING}
  * @param available whether a usable answer was obtained at all

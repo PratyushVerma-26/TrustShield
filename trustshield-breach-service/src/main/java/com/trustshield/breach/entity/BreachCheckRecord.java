@@ -15,29 +15,15 @@ import jakarta.persistence.Table;
 import com.trustshield.common.dto.ThreatLevel;
 
 /**
- * Audit record of a breach check.
+ * Audit record of a breach verification query.
  *
- * <h2>What is deliberately not stored</h2>
- *
- * <p>Neither the password nor the email address is persisted, in any form that
- * could be reversed:
- *
+ * <p>Enforces privacy-by-design and data minimization at the schema level:
  * <ul>
- *   <li><strong>Passwords:</strong> only {@code bucketPrefix}, the 5 hex
- *       characters of the SHA-1 that the k-anonymity protocol already discloses
- *       to the API. One bucket in 16^5 covers roughly a millionth of the hash
- *       space, so the record cannot identify the password even in principle. The
- *       remaining 35 characters are never written anywhere.</li>
- *   <li><strong>Email addresses:</strong> only {@code subjectHash}, a SHA-256 of
- *       the lower-cased address. This supports "have I checked this before"
- *       without the database holding personal data. Note the honest limitation:
- *       an email address has low entropy, so a hash is pseudonymisation, not
- *       anonymisation — someone with a candidate list can confirm a guess. It is
- *       a real improvement over plaintext, not a guarantee.</li>
+ *   <li><strong>Passwords:</strong> Only {@code bucketPrefix} (the 5-character SHA-1 prefix)
+ *       is retained; plaintext and remaining hash characters are never persisted.</li>
+ *   <li><strong>Email addresses:</strong> Pseudonymized via SHA-256 ({@code subjectHash})
+ *       to support historical query correlation without retaining plaintext PII.</li>
  * </ul>
- *
- * <p>This is the data-minimisation principle of the DPDP Act 2023 applied at the
- * schema level, where it cannot be forgotten later, rather than as a policy note.
  */
 @Entity
 @Table(name = "breach_check_record", indexes = {

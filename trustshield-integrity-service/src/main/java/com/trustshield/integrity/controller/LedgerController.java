@@ -78,8 +78,8 @@ public class LedgerController {
     }
 
     @GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Ledger cryptographic architecture and viva defense rationale",
-            description = "Explains why linear SHA-256 chaining + Ed25519 was chosen over blockchain consensus overhead.")
+    @Operation(summary = "Ledger cryptographic architecture and design specifications",
+            description = "Details linear SHA-256 chaining and Ed25519 asymmetric signature specifications.")
     public ResponseEntity<Map<String, Object>> info() {
         LedgerHeadResponse head = service.getHead();
         return ResponseEntity.ok(Map.of(

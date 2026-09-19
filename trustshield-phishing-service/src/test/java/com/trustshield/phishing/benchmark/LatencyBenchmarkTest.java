@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Benchmark harness reporting p50, p95, and p99 latencies over 1,000 iterations
  * after JIT warmup.
  *
- * <h2>Two numbers, never conflated</h2>
+ * <h2>Performance Metrics Breakdown</h2>
  *
  * <ol>
  *   <li><strong>Local model inference</strong>: Lexical feature extraction (26 features) +

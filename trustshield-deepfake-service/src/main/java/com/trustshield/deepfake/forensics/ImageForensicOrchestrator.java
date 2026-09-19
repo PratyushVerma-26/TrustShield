@@ -24,7 +24,7 @@ import java.util.List;
  *
  * <p>Enforces the system invariants:
  * <ol>
- *   <li><strong>Honest Recompression Handling:</strong> If recompression destroyed forensic traces,
+ *   <li><strong>Recompression Handling:</strong> If recompression destroyed forensic traces,
  *       emit {@link ThreatLevel#UNKNOWN} (score 0, degraded=true).</li>
  *   <li><strong>Inspectable Signals:</strong> Every point of risk score is backed by a discrete {@link ThreatSignal}.</li>
  *   <li><strong>Generative AI Caveat:</strong> Clearly state in verdicts that classical forensics does not

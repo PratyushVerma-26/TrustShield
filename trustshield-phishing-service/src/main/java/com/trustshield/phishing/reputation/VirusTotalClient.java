@@ -16,25 +16,10 @@ import java.time.Duration;
 import java.util.Base64;
 
 /**
- * VirusTotal v3 URL reputation lookup.
+ * VirusTotal v3 URL reputation client.
  *
- * <p>Two behaviours worth noting, both of which the original project draft got
- * wrong:
- *
- * <ol>
- *   <li>VirusTotal identifies a URL by its unpadded base64url encoding. Using
- *       standard base64 (with {@code +}, {@code /} and {@code =}) yields a
- *       malformed identifier and a 400.</li>
- *   <li>A URL VirusTotal has never analysed returns <strong>404</strong>, not a
- *       clean result. Treating 404 as clean — as a naive implementation does —
- *       means every freshly registered phishing domain, which is exactly the
- *       dangerous case, is reported as safe. Here 404 maps to
- *       {@code unavailable}.</li>
- * </ol>
- *
- * <p>Submitting unknown URLs for analysis and polling for the result is possible
- * but takes tens of seconds, far outside the latency budget, so it is not done
- * on the request path.
+ * <p>Identifies URLs via unpadded Base64URL encoding according to VirusTotal v3 API specifications.
+ * Unanalyzed URLs (HTTP 404) are mapped to unavailable status to avoid assuming unknown domains are clean.
  */
 @Component
 public class VirusTotalClient implements ReputationSource {

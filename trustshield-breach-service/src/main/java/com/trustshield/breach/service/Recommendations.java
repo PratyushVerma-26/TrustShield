@@ -3,32 +3,11 @@ package com.trustshield.breach.service;
 import com.trustshield.common.dto.ThreatLevel;
 
 /**
- * Plain-language guidance for breach verdicts.
+ * Contextual recommendation generator for credential and breach verification verdicts.
  *
- * <h2>Why this exists rather than {@code ThreatLevel.getRecommendation()}</h2>
- *
- * <p>Two independent reasons, and the first is a real defect that this class was
- * written to fix.
- *
- * <p><strong>1. A zero score is not the same as "safe".</strong> The shared
- * {@code ThreatLevel} maps a score of 0 to {@code SAFE}, whose recommendation
- * reads "This appears safe." That is correct when the system actually checked and
- * found nothing. It is <em>wrong</em> when the score is 0 because every source was
- * unavailable, or because the user declined to authorise the lookup. Both of those
- * produce a score of 0 with {@code degraded=true}, and both would have told the
- * user their credential "appears safe" while nothing had in fact been checked.
- *
- * <p>That is the same mistake as collapsing {@code UNAVAILABLE} into
- * {@code NOT_FOUND}, which {@code BreachLookupResult} takes care to avoid — it had
- * simply reappeared one layer later, in the sentence the user actually reads. The
- * score and the {@code degraded} flag were right all along; the prose was not.
- * Guidance is therefore selected by <em>verdict state first</em>, and only falls
- * through to the severity band when the verdict is a complete answer.
- *
- * <p><strong>2. The shared wording is written for messages, not credentials.</strong>
- * {@code DANGEROUS} advises "Do not click, reply, pay or share credentials. Delete
- * it." Sound advice about a suspicious link; meaningless advice about your own
- * password. Each module owes its user guidance phrased for its own domain.
+ * <p>Dispatches plain-language guidance tailored to credential security, resolving
+ * recommendations by verdict state first, and then falling through to severity bands
+ * only when lookups produce conclusive answers.
  */
 final class Recommendations {
 
@@ -60,10 +39,7 @@ final class Recommendations {
                 case SAFE -> "Not found in the corpora consulted, and no structural weakness "
                         + "was detected. Note this is not proof of safety: no corpus contains "
                         + "every breach.";
-                // Unreachable by construction: NO_EXPOSURE_FOUND is only issued when
-                // every source answered, and UNKNOWN means none did. Present because
-                // the switch must be total, and worded so that if the two ever do
-                // meet, the output is honest rather than merely compiling.
+                // Exhaustive switch handling: fallback if state and level diverge
                 case UNKNOWN -> "No source could be reached, so nothing is known either way. "
                         + "Do not treat this as a clean verdict.";
             };

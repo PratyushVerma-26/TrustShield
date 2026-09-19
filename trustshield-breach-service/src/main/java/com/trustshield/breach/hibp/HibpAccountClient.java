@@ -11,27 +11,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.trustshield.breach.config.BreachProperties;
 
 /**
- * Client for the HIBP breached-account endpoint.
+ * Client for the Have I Been Pwned (HIBP) breached-account endpoint.
  *
- * <p><strong>This endpoint is not k-anonymous, and the class is separate from
- * {@link PwnedPasswordsClient} to make that impossible to overlook.</strong> It
- * transmits the full email address to a third party and requires a paid API key.
- * There is no prefix trick available: HIBP does not offer a range variant for
- * accounts, because the answer set is per-address rather than per-hash-bucket.
+ * <p>Unlike range-based password queries, account breach checks transmit
+ * the query email address to the external API and require a configured API key.
  *
- * <p>Consequences that follow from that, and which are implemented here:
- *
+ * <p>Key operational characteristics:
  * <ul>
- *   <li>Disabled by default. A demo must not silently exfiltrate an address.</li>
- *   <li>The API response is reduced to breach <em>names and metadata returned by
- *       HIBP itself</em>. Nothing is inferred or embellished locally.</li>
- *   <li>The caller is told {@code kAnonymous=false} so the UI can warn before the
- *       lookup, which is the DPDP Act's notice-and-consent expectation rather
- *       than an afterthought.</li>
+ *   <li>Disabled by default; requires explicit enablement and API key configuration.</li>
+ *   <li>Parses breach metadata returned by the upstream provider without local inference.</li>
+ *   <li>Reports {@code kAnonymous=false} to provide transparent privacy posture to clients.</li>
  * </ul>
  *
- * <p>When no key is configured the service returns {@code UNAVAILABLE} and the
- * verdict is marked degraded. It does not fall back to guessing.
+ * <p>When no key is configured, the client returns an {@code UNAVAILABLE} result
+ * with degraded status.
  */
 @Component
 public class HibpAccountClient {
@@ -47,7 +40,7 @@ public class HibpAccountClient {
         this.config = properties.hibpAccount();
         this.restClient = RestClient.builder()
                 .baseUrl(config.baseUrl())
-                .defaultHeader("User-Agent", "TrustShield-BreachMonitor/1.0 (academic project)")
+                .defaultHeader("User-Agent", "TrustShield-BreachMonitor/1.0")
                 .build();
     }
 
@@ -101,14 +94,9 @@ public class HibpAccountClient {
     }
 
     /**
-     * A breach as described by HIBP.
+     * A breach record returned by HIBP.
      *
-     * <p>HIBP returns PascalCase JSON. Rather than naming the record components
-     * {@code Name}/{@code Title} to match — which is legal Java but reads like a
-     * mistake — the mapping is made explicit with {@code @JsonProperty}.
-     *
-     * <p>Only the subset of fields actually shown to the user is mapped; Jackson
-     * ignores the rest by default.
+     * <p>Maps upstream PascalCase JSON properties explicitly to canonical Java record fields.
      */
     public record HibpBreach(
             @JsonProperty("Name") String name,
