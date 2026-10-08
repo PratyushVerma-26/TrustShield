@@ -101,4 +101,47 @@ class LedgerIntegrationTest {
                 .andExpect(jsonPath("$.port").value(8087))
                 .andExpect(jsonPath("$.genesisHash").exists());
     }
+
+    @Test
+    @DisplayName("Failure Drill 2: Tampered ledger entry payload breaks SHA-256 hash chain and flags firstCorruptedIndex")
+    void tamperedEntryBreaksHashChainAndIdentifiesFirstCorruptedIndex() throws Exception {
+        // Commit entry 0
+        String req0 = """
+                {
+                    "incidentId": "INC-DRILL-001",
+                    "module": "PHISHING",
+                    "canonicalVerdictJson": "{\\"score\\":15,\\"level\\":\\"LOW\\"}"
+                }
+                """;
+        mockMvc.perform(post("/api/v1/integrity/append")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(req0))
+                .andExpect(status().isOk());
+
+        // Commit entry 1
+        String req1 = """
+                {
+                    "incidentId": "INC-DRILL-002",
+                    "module": "DEEPFAKE",
+                    "canonicalVerdictJson": "{\\"score\\":88,\\"level\\":\\"DANGEROUS\\"}"
+                }
+                """;
+        mockMvc.perform(post("/api/v1/integrity/append")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(req1))
+                .andExpect(status().isOk());
+
+        // Maliciously mutate entry 0's canonicalPayload directly in the database
+        var record0 = repository.findBySequenceNumber(0L).orElseThrow();
+        record0.setCanonicalPayload("{\"score\":0,\"level\":\"SAFE\",\"tampered\":true}");
+        repository.save(record0);
+
+        // Verify hash chain via GET /api/v1/integrity/verify
+        mockMvc.perform(get("/api/v1/integrity/verify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath("$.firstCorruptedIndex").value(0))
+                .andExpect(jsonPath("$.failureReason").value(org.hamcrest.Matchers.containsString("Payload tampering detected at sequence 0")))
+                .andExpect(jsonPath("$.signatureValid").value(false));
+    }
 }
