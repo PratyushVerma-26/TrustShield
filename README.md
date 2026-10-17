@@ -11,12 +11,16 @@ Java 21 · Spring Boot 3.3.5 · Maven multi-module monorepo
 
 The following project documents provide complete coverage for academic review, viva-voce evaluation, and production deployment:
 
+- **[Public Deployment & Standalone Channels Guide (PUBLIC_DEPLOYMENT_GUIDE.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/PUBLIC_DEPLOYMENT_GUIDE.md)**: Production deployment runbook for hosting the standalone Web Console (Vercel/Nginx), standalone Conversational Bot (WhatsApp Cloud API / Telegram Webhooks), and standalone Mobile App (EAS Android APK build).
 - **[System Architecture Specification (ARCHITECTURE.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/ARCHITECTURE.md)**: Formal architecture specification, microservice topology, invariants, security models, mathematical proofs, and SLA benchmarks.
 - **[Evaluator Demonstration Runbook (DEMO_SCRIPT.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/DEMO_SCRIPT.md)**: End-to-end evaluator script with executable curl commands across all 7 threat vectors, ledger audit steps, bot flows, and failure drills.
 - **[Technical Presentation Deck (PRESENTATION_DECK.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/PRESENTATION_DECK.md)**: 13-slide evaluation deck summarizing project architecture, empirical benchmarks, and evaluation roadmap.
 - **[Capstone Project Report (docs/TRUSTSHIELD_FINAL_YEAR_PROJECT_REPORT.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/TRUSTSHIELD_FINAL_YEAR_PROJECT_REPORT.md)**: Comprehensive IEEE-referenced final year capstone project report.
 - **[Official Microsoft Word Report (docs/TrustShield_Final_Year_Project_Report.docx)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/TrustShield_Final_Year_Project_Report.docx)**: Pre-formatted docx report with formal typography, headers, footers, tables, and list of abbreviations.
+- **[Automated Evaluator Rehearsal Suite (scripts/rehearsal.ps1)](file:///C:/Users/Pratyush/Desktop/Trustsheild/scripts/rehearsal.ps1)**: Single-command end-to-end automated rehearsal evaluating mesh health, all 7 threat vectors, ledger link-by-link audit, and failure drills with an interactive scorecard.
 - **[Automated Failure Drills Suite (scripts/test_failure_drills.ps1)](file:///C:/Users/Pratyush/Desktop/Trustsheild/scripts/test_failure_drills.ps1)**: Automated test harness validating the 4 core platform safety and resilience invariants.
+- **[Multi-Container Docker Topology (docker-compose.yml)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docker-compose.yml)**: Production orchestration for all 8 microservices with network isolation, health checks, and unprivileged user security.
+- **[Cloud CI/CD Pipeline (.github/workflows/ci.yml)](file:///C:/Users/Pratyush/Desktop/Trustsheild/.github/workflows/ci.yml)**: Continuous integration matrix for Java 21 197-test suite, Python AST checks, TypeScript builds, and Docker validation.
 
 ---
 
@@ -121,7 +125,27 @@ It builds fat jars once and manages services as detached background processes wi
 
 # Stop all running TrustShield processes cleanly
 .\scripts\run-all.ps1 -Stop
+
+# Run automated end-to-end rehearsal across all threat vectors & failure drills
+.\scripts\rehearsal.ps1
 ```
+
+### Docker Multi-Container Mesh Orchestration
+
+Alternatively, deploy all 8 microservices as lightweight, resource-bounded Docker containers:
+
+```bash
+# Build and orchestrate all microservices in the background
+docker compose up -d --build
+
+# View container status and healthchecks
+docker compose ps
+
+# View unified or per-service logs
+docker compose logs -f gateway
+```
+
+For complete production hosting instructions for the standalone Web Console, Conversational Bot (WhatsApp & Telegram), and Mobile App (.apk build), see **[PUBLIC_DEPLOYMENT_GUIDE.md](file:///C:/Users/Pratyush/Desktop/Trustsheild/PUBLIC_DEPLOYMENT_GUIDE.md)**.
 
 ### Single Entrypoint: Unified API Gateway (Port 8080)
 

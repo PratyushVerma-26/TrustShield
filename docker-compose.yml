@@ -1,0 +1,241 @@
+networks:
+  trustshield-net:
+    driver: bridge
+    name: trustshield-network
+
+services:
+  # ============================================================================
+  # 1. Unified API Gateway (Port 8080)
+  # ============================================================================
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-gateway
+        SERVICE_PORT: 8080
+    container_name: trustshield-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      - SERVER_PORT=8080
+      - TRUSTSHIELD_PHISHING_URL=http://phishing-service:8083
+      - TRUSTSHIELD_BREACH_URL=http://breach-service:8084
+      - TRUSTSHIELD_DEEPFAKE_URL=http://deepfake-service:8085
+      - TRUSTSHIELD_FAKENEWS_URL=http://fakenews-service:8086
+      - TRUSTSHIELD_INTEGRITY_URL=http://integrity-service:8087
+      - TRUSTSHIELD_FUSION_URL=http://fusion-service:8088
+      - TRUSTSHIELD_BOT_URL=http://bot-service:8089
+    depends_on:
+      phishing-service:
+        condition: service_healthy
+      breach-service:
+        condition: service_healthy
+      deepfake-service:
+        condition: service_healthy
+      fakenews-service:
+        condition: service_healthy
+      integrity-service:
+        condition: service_healthy
+      fusion-service:
+        condition: service_healthy
+      bot-service:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 2. Phishing & Malicious URL Shield (Port 8083)
+  # ============================================================================
+  phishing-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-phishing-service
+        SERVICE_PORT: 8083
+    container_name: trustshield-phishing-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - GOOGLE_SAFEBROWSING_KEY=${GOOGLE_SAFE_BROWSING_API_KEY:-}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 3. Credential Breach & Entropy Monitor (Port 8084)
+  # ============================================================================
+  breach-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-breach-service
+        SERVICE_PORT: 8084
+    container_name: trustshield-breach-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - HIBP_API_KEY=${HIBP_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 4. Multi-Modal Deepfake Forensics Detector (Port 8085)
+  # ============================================================================
+  deepfake-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-deepfake-service
+        SERVICE_PORT: 8085
+    container_name: trustshield-deepfake-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SERVER_PORT=8085
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 5. Misinformation & Chyron Verifier (Port 8086)
+  # ============================================================================
+  fakenews-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-fakenews-service
+        SERVICE_PORT: 8086
+    container_name: trustshield-fakenews-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - SERVER_PORT=8086
+      - GOOGLE_FACT_CHECK_API_KEY=${GOOGLE_FACT_CHECK_API_KEY:-}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 6. Cryptographic Integrity Ledger (Port 8087)
+  # ============================================================================
+  integrity-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-integrity-service
+        SERVICE_PORT: 8087
+    container_name: trustshield-integrity-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    environment:
+      - SERVER_PORT=8087
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 7. Multi-Vector Threat Fusion Engine (Port 8088)
+  # ============================================================================
+  fusion-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-fusion-service
+        SERVICE_PORT: 8088
+    container_name: trustshield-fusion-service
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      - SERVER_PORT=8088
+      - TRUSTSHIELD_PHISHING_URL=http://phishing-service:8083
+      - TRUSTSHIELD_BREACH_URL=http://breach-service:8084
+      - TRUSTSHIELD_DEEPFAKE_URL=http://deepfake-service:8085
+      - TRUSTSHIELD_FAKENEWS_URL=http://fakenews-service:8086
+      - TRUSTSHIELD_INTEGRITY_URL=http://integrity-service:8087
+    depends_on:
+      phishing-service:
+        condition: service_healthy
+      breach-service:
+        condition: service_healthy
+      deepfake-service:
+        condition: service_healthy
+      fakenews-service:
+        condition: service_healthy
+      integrity-service:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net
+
+  # ============================================================================
+  # 8. Cyber-Defense Conversational Bot (Port 8089)
+  # ============================================================================
+  bot-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: trustshield-bot-service
+        SERVICE_PORT: 8089
+    container_name: trustshield-bot-service
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      - SERVER_PORT=8089
+      - TRUSTSHIELD_GATEWAY_URL=http://gateway:8080
+      - TRUSTSHIELD_PHISHING_URL=http://phishing-service:8083
+      - TRUSTSHIELD_BREACH_URL=http://breach-service:8084
+      - TRUSTSHIELD_DEEPFAKE_URL=http://deepfake-service:8085
+      - TRUSTSHIELD_FAKENEWS_URL=http://fakenews-service:8086
+      - TRUSTSHIELD_INTEGRITY_URL=http://integrity-service:8087
+      - TRUSTSHIELD_FUSION_URL=http://fusion-service:8088
+      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN:-trustshield_webhook_token_2026}
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - trustshield-net

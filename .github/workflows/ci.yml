@@ -1,0 +1,102 @@
+name: TrustShield CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # 1. Java Maven Multi-Module Reactor Build & Test Suite (197 Tests)
+  # ============================================================================
+  backend-build-test:
+    name: Backend Build & Test Suite (Java 21)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up OpenJDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compile and Run All 197 Unit & Integration Tests
+        run: mvn --batch-mode --errors --fail-at-end clean test
+
+      - name: Package Fat JAR Artifacts
+        run: mvn --batch-mode package -DskipTests
+
+  # ============================================================================
+  # 2. Static Sanity & Forensic Dataset Parity Checks
+  # ============================================================================
+  static-and-ml-checks:
+    name: Static Sanity & ML Parity Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Run TrustShield Static Architecture & AST Checks
+        run: python scripts/static_check.py
+
+  # ============================================================================
+  # 3. Frontend Client TypeScript & Production Build
+  # ============================================================================
+  frontend-build:
+    name: Frontend Clients Build & Contract Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build & Test Verdict Core Contracts
+        working-directory: packages/verdict-core
+        run: |
+          npm ci
+          npm run test
+          npm run build
+
+      - name: Build Web Console Operations Cockpit
+        working-directory: packages/web-console
+        run: |
+          npm ci
+          npm run build
+
+  # ============================================================================
+  # 4. Docker Compose & Container Orchestration Validation
+  # ============================================================================
+  docker-validation:
+    name: Docker Compose Topology Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config --dry-run
