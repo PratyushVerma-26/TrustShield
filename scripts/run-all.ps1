@@ -235,39 +235,47 @@ foreach ($svc in $Services) {
     $errFile = Join-Path $LogsDir "$name-err.log"
     Write-Host "  [+] Starting $name on port $port -> log: logs/$name.log" -ForegroundColor Green
 
-    $cmdLine = "java -Dserver.port=$port -jar `"$jarFullPath`" > `"$logFile`" 2> `"$errFile`""
-    Start-Process cmd.exe -ArgumentList "/c", $cmdLine -WorkingDirectory $RepoRoot -WindowStyle Hidden
+    $proc = Start-Process -FilePath "java" `
+        -ArgumentList "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Dserver.port=$port", "-jar", "`"$jarFullPath`"" `
+        -RedirectStandardOutput $logFile `
+        -RedirectStandardError $errFile `
+        -WorkingDirectory $RepoRoot `
+        -WindowStyle Hidden `
+        -PassThru
+
+    if ($proc) {
+        $runningPids[$name] = $proc.Id
+    }
     $startedCount++
 }
 
 if (-not $NoWait -and $startedCount -gt 0) {
-    Write-Host "`nWaiting for services to become healthy..." -ForegroundColor Cyan
-    $timeoutSeconds = 35
+    $timeoutSeconds = 60
+    Write-Host "`nWaiting for all services to become healthy (timeout: ${timeoutSeconds}s)..." -ForegroundColor Cyan
     $startTime = Get-Date
 
+    $pending = [System.Collections.Generic.List[object]]::new()
     foreach ($svc in $Services) {
-        $port = $svc.Port
-        $jarFullPath = Join-Path $RepoRoot $svc.Jar
-        if (-not (Test-Path $jarFullPath)) { continue }
-
-        $ready = $false
-        while (-not $ready -and ((Get-Date) - $startTime).TotalSeconds -lt $timeoutSeconds) {
-            if (Test-PortOpen $port) {
-                $ready = $true
-                break
-            }
-            Start-Sleep -Milliseconds 500
+        if (Test-Path (Join-Path $RepoRoot $svc.Jar)) {
+            $pending.Add($svc)
         }
+    }
 
-        if ($ready) {
-            $conn = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($conn -and $conn.OwningProcess) {
-                $runningPids[$svc.Name] = $conn.OwningProcess
+    while ($pending.Count -gt 0 -and ((Get-Date) - $startTime).TotalSeconds -lt $timeoutSeconds) {
+        for ($i = $pending.Count - 1; $i -ge 0; $i--) {
+            $svc = $pending[$i]
+            if (Test-PortOpen $svc.Port) {
+                Write-Host "  [OK] $($svc.Name) ready on port $($svc.Port)" -ForegroundColor Green
+                $pending.RemoveAt($i)
             }
-            Write-Host "  [OK] $($svc.Name) ready on port $port" -ForegroundColor Green
-        } else {
-            Write-Host "  [WARN] $($svc.Name) did not open port $port within $timeoutSeconds s (check logs/$($svc.Name).log)" -ForegroundColor Red
         }
+        if ($pending.Count -gt 0) {
+            Start-Sleep -Seconds 1
+        }
+    }
+
+    foreach ($svc in $pending) {
+        Write-Host "  [WARN] $($svc.Name) did not open port $($svc.Port) within ${timeoutSeconds}s (check logs/$($svc.Name).log)" -ForegroundColor Red
     }
 }
 
