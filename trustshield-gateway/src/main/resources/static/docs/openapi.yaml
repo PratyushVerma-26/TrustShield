@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: TrustShield Unified Cyber-Defense API
+  version: 1.0.0
+  description: |
+    Unified, single-origin API Gateway specifications for the TrustShield
+    cyber-defense platform. Orchestrates real-time threat intelligence across
+    phishing detection, credential breach audits, multimodal deepfake forensics,
+    misinformation debunking, cross-modal evidence fusion, and cryptographic
+    tamper-evident audit logging.
+servers:
+  - url: http://localhost:8080
+    description: Local API Gateway
+  - url: https://api.trustshield.io
+    description: Production HTTPS Cloud Gateway
+
+tags:
+  - name: Gateway & Health
+    description: Service discovery and platform availability
+  - name: Phishing Shield
+    description: Lexical heuristic and ML classification for malicious URLs
+  - name: Breach Monitor
+    description: k-Anonymity range search and entropy analysis for credentials
+  - name: Deepfake Forensics
+    description: Multimodal image, video, and audio synthetic artifact detection
+  - name: Misinformation Verifier
+    description: SimHash near-duplicate debunking and television chyron typography analysis
+  - name: Cryptographic Ledger
+    description: SHA-256 append-only hash chain and Ed25519 digital signatures
+  - name: Evidence Fusion
+    description: Cross-modal bounded risk score aggregation and incident logging
+  - name: Conversational Bot
+    description: Conversational cyber-defense routing for WhatsApp, Telegram, and Web Chat
+
+paths:
+  /actuator/health:
+    get:
+      tags:
+        - Gateway & Health
+      summary: Microservice mesh health check
+      description: Returns the health status of the Gateway and downstream connections.
+      responses:
+        '200':
+          description: Gateway is operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+
+  /api/v1/phishing/scan:
+    post:
+      tags:
+        - Phishing Shield
+      summary: Scan a URL for phishing or homograph impersonation
+      description: Evaluates 26 structural and lexical features alongside reputation signals.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  example: https://secure-login.paypal.com.account-verification-notice.xyz/update-credentials
+      responses:
+        '200':
+          description: Threat scan completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhishingResponse'
+        '503':
+          $ref: '#/components/responses/DegradedResponse'
+
+  /api/v1/phishing/model:
+    get:
+      tags:
+        - Phishing Shield
+      summary: Retrieve phishing model provenance and metadata
+      responses:
+        '200':
+          description: Model metadata and feature weight vector
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trained:
+                    type: boolean
+                    example: true
+                  provenance:
+                    type: string
+                    example: TRAINED
+                  trainedOn:
+                    type: string
+                    example: 2026-10-15T18:00:00Z
+                  featureCount:
+                    type: integer
+                    example: 26
+
+  /api/v1/breach/password:
+    post:
+      tags:
+        - Breach Monitor
+      summary: Evaluate password exposure and Shannon entropy
+      description: Executes k-anonymity SHA-1 range search and zxcvbn structural entropy assessment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  example: Password123!
+      responses:
+        '200':
+          description: Password assessment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResponse'
+        '503':
+          $ref: '#/components/responses/DegradedResponse'
+
+  /api/v1/deepfake/scan:
+    post:
+      tags:
+        - Deepfake Forensics
+      summary: Analyze image, video, or audio for synthetic artifacts
+      description: Evaluates Error Level Analysis (ELA), DQT quantization, video optical flow, or audio spectral roll-off.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - imageBase64
+              properties:
+                imageBase64:
+                  type: string
+                  description: Base64-encoded media payload
+                  example: iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
+                filename:
+                  type: string
+                  example: sample.png
+                mimeType:
+                  type: string
+                  example: image/png
+      responses:
+        '200':
+          description: Forensic analysis verdict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeepfakeResponse'
+        '503':
+          $ref: '#/components/responses/DegradedResponse'
+
+  /api/v1/misinformation/check:
+    post:
+      tags:
+        - Misinformation Verifier
+      summary: Verify claim veracity and detect spliced news chyrons
+      description: Queries 64-bit SimHash debunk catalogue and evaluates sensational typography markers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - claimText
+              properties:
+                claimText:
+                  type: string
+                  example: UNESCO declares Indian national anthem Jana Gana Mana as best national anthem in the world
+                context:
+                  type: string
+                  example: WHATSAPP_FORWARD
+      responses:
+        '200':
+          description: Veracity assessment verdict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimResponse'
+        '503':
+          $ref: '#/components/responses/DegradedResponse'
+
+  /api/v1/ledger/head:
+    get:
+      tags:
+        - Cryptographic Ledger
+      summary: Retrieve tip block of append-only audit chain
+      responses:
+        '200':
+          description: Current ledger head details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sequenceNumber:
+                    type: integer
+                    example: 42
+                  headChainHash:
+                    type: string
+                    example: a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0
+                  ed25519SignatureHex:
+                    type: string
+                    example: 3f8a92...
+                  publicKeyBase64:
+                    type: string
+                    example: MCowBQYDK2VwAyEA...
+
+  /api/v1/ledger/verify:
+    get:
+      tags:
+        - Cryptographic Ledger
+      summary: Verify full cryptographic ledger link-by-link
+      description: Recalculates all SHA-256 hashes from genesis and verifies the Ed25519 signature.
+      responses:
+        '200':
+          description: Cryptographic audit report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: true
+                  totalEntriesChecked:
+                    type: integer
+                    example: 42
+                  signatureValid:
+                    type: boolean
+                    example: true
+                  failureReason:
+                    type: string
+                    example: Ledger integrity intact. All hashes and signatures valid.
+
+  /api/v1/fusion/evaluate:
+    post:
+      tags:
+        - Evidence Fusion
+      summary: Aggregate multi-modal threat evidence into a composite verdict
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - incidentId
+                - verdicts
+              properties:
+                incidentId:
+                  type: string
+                  example: INC-2026-OCT-001
+                verdicts:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ModuleVerdict'
+      responses:
+        '200':
+          description: Composite risk evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FusionResponse'
+        '503':
+          $ref: '#/components/responses/DegradedResponse'
+
+  /api/v1/bot/chat:
+    post:
+      tags:
+        - Conversational Bot
+      summary: Send an interactive chat message to the cyber-defense bot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  example: Is this link safe? https://secure-bank.xyz
+                sessionId:
+                  type: string
+                  example: sess-12345
+      responses:
+        '200':
+          description: Bot threat assessment response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reply:
+                    type: string
+                  threatLevel:
+                    type: string
+                    example: DANGEROUS
+                  riskScore:
+                    type: integer
+                    example: 95
+
+components:
+  responses:
+    DegradedResponse:
+      description: Downstream microservice is offline; returned structured safe fallback
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: SERVICE_UNAVAILABLE
+              message:
+                type: string
+                example: Target microservice is temporarily unreachable.
+              degraded:
+                type: boolean
+                example: true
+
+  schemas:
+    ThreatLevel:
+      type: string
+      enum: [DANGEROUS, SUSPICIOUS, SAFE, LOW, UNKNOWN]
+
+    Verdict:
+      type: object
+      properties:
+        threatLevel:
+          $ref: '#/components/schemas/ThreatLevel'
+        riskScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        verdict:
+          type: string
+        explanation:
+          type: string
+        degraded:
+          type: boolean
+
+    ModuleVerdict:
+      type: object
+      required:
+        - module
+        - riskScore
+        - threatLevel
+        - verdict
+        - explanation
+        - signals
+        - latencyMs
+        - evaluatedAt
+        - degraded
+      properties:
+        module:
+          type: string
+          enum: [PHISHING, BREACH, DEEPFAKE, FAKENEWS, FUSION]
+        riskScore:
+          type: integer
+        threatLevel:
+          $ref: '#/components/schemas/ThreatLevel'
+        verdict:
+          type: string
+        explanation:
+          type: string
+        signals:
+          type: array
+          items:
+            type: object
+        latencyMs:
+          type: integer
+        evaluatedAt:
+          type: string
+        degraded:
+          type: boolean
+
+    PhishingResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        lexicalFeatures:
+          type: object
+        signals:
+          type: array
+          items:
+            type: object
+
+    PasswordResponse:
+      type: object
+      properties:
+        breached:
+          type: boolean
+        breachCount:
+          type: integer
+        entropyBits:
+          type: number
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+
+    DeepfakeResponse:
+      type: object
+      properties:
+        metadata:
+          type: object
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        forensicSignals:
+          type: object
+        videoTemporalSignals:
+          type: object
+        audioForensicSignals:
+          type: object
+
+    ClaimResponse:
+      type: object
+      properties:
+        claimText:
+          type: string
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        simHashMatch:
+          type: object
+        styleAnalysis:
+          type: object
+
+    FusionResponse:
+      type: object
+      properties:
+        incidentId:
+          type: string
+        compositeThreatLevel:
+          $ref: '#/components/schemas/ThreatLevel'
+        compositeScore:
+          type: integer
+        triggeredRules:
+          type: array
+          items:
+            type: string
+        ledgerSequenceNumber:
+          type: integer

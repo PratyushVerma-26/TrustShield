@@ -103,6 +103,9 @@ public class RateLimitingFilter implements Filter {
                 || path.equals("/")
                 || path.equals("/index.html")
                 || path.equals("/chat.html")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/docs")
+                || path.equals("/openapi.yaml")
                 || path.equals("/favicon.ico")
                 || path.startsWith("/actuator/health");
     }
