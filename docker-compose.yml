@@ -239,3 +239,29 @@ services:
           memory: 512M
     networks:
       - trustshield-net
+
+  # ============================================================================
+  # 9. Standalone Operations Web Console (Port 3000 -> 80)
+  # ============================================================================
+  web-console:
+    build:
+      context: .
+      dockerfile: packages/web-console/Dockerfile
+      args:
+        VITE_GATEWAY_URL: ${VITE_GATEWAY_URL:-http://localhost:8080}
+    container_name: trustshield-web-console
+    restart: unless-stopped
+    ports:
+      - "${WEB_CONSOLE_PORT:-3000}:80"
+    profiles:
+      - frontend
+      - full
+    depends_on:
+      gateway:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - trustshield-net

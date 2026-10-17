@@ -21,6 +21,9 @@ The following project documents provide complete coverage for academic review, v
 - **[Automated Failure Drills Suite (scripts/test_failure_drills.ps1)](file:///C:/Users/Pratyush/Desktop/Trustsheild/scripts/test_failure_drills.ps1)**: Automated test harness validating the 4 core platform safety and resilience invariants.
 - **[Multi-Container Docker Topology (docker-compose.yml)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docker-compose.yml)**: Production orchestration for all 8 microservices with network isolation, health checks, and unprivileged user security.
 - **[Cloud CI/CD Pipeline (.github/workflows/ci.yml)](file:///C:/Users/Pratyush/Desktop/Trustsheild/.github/workflows/ci.yml)**: Continuous integration matrix for Java 21 197-test suite, Python AST checks, TypeScript builds, and Docker validation.
+- **[OpenAPI 3.0 Specification (docs/trustshield-openapi.yaml)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/trustshield-openapi.yaml)**: Canonical OpenAPI 3.0 specification for all single-origin Gateway routes and payloads.
+- **[Postman API Collection (docs/TrustShield_API_Collection.postman_collection.json)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/TrustShield_API_Collection.postman_collection.json)**: Ready-to-import Postman collection with pre-configured requests across all threat vectors and ledger audits.
+- **[Empirical Benchmark Manifest (docs/BENCHMARK_MANIFEST.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/BENCHMARK_MANIFEST.md)**: Official records of dataset distributions, mathematical zero-skew parity, confusion matrices, and latency percentiles.
 
 ---
 

@@ -132,6 +132,8 @@ declared_types = {}   # fully-qualified name -> path
 imports_needed = []   # (path, fqn)
 
 for java in sorted(ROOT.rglob("*.java")):
+    if any(part in java.parts for part in ("node_modules", "target", ".git")):
+        continue
     checked_java += 1
     raw = java.read_text(encoding="utf-8")
     code = strip_java_noise(raw)
@@ -189,7 +191,7 @@ for path, fqn, is_static in imports_needed:
 # POMs
 # ---------------------------------------------------------------------------
 
-poms = sorted(ROOT.rglob("pom.xml"))
+poms = [p for p in sorted(ROOT.rglob("pom.xml")) if not any(part in p.parts for part in ("node_modules", "target", ".git"))]
 module_dirs_declared = []
 for pom in poms:
     try:
@@ -213,6 +215,8 @@ for pom, mod in module_dirs_declared:
 # ---------------------------------------------------------------------------
 
 for y in sorted(ROOT.rglob("*.yml")) + sorted(ROOT.rglob("*.yaml")):
+    if any(part in y.parts for part in ("node_modules", "target", ".git")):
+        continue
     try:
         list(yaml.safe_load_all(y.read_text(encoding="utf-8")))
     except yaml.YAMLError as e:
@@ -250,6 +254,8 @@ else:
     err("UrlFeatureExtractor.java not found")
 
 for mj in sorted(ROOT.rglob("phishing_model.json")):
+    if any(part in mj.parts for part in ("node_modules", "target", ".git")):
+        continue
     try:
         model = json.loads(mj.read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:

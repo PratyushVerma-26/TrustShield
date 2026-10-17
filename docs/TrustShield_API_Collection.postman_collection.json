@@ -1,0 +1,299 @@
+{
+  "info": {
+    "_postman_id": "c1f7b8a2-98e3-4d6f-b258-7e3f94082260",
+    "name": "TrustShield Cyber-Defense API Collection",
+    "description": "Ready-to-run Postman collection covering all 7 threat vectors, cryptographic audit verification, cross-modal fusion, and conversational bot workflows routed through the unified TrustShield API Gateway (:8080).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Phishing Shield",
+      "item": [
+        {
+          "name": "Scan Malicious Homograph URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://secure-login.paypal.com.account-verification-notice.xyz/update-credentials\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/phishing/scan",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "phishing", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Scan Benign Whitelisted Domain",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://www.wikipedia.org/wiki/Computer_security\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/phishing/scan",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "phishing", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Get Phishing Model Metadata",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/phishing/model",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "phishing", "model"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Breach Monitor",
+      "item": [
+        {
+          "name": "Check Known Breached Password (k-Anonymity)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/breach/password",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "breach", "password"]
+            }
+          }
+        },
+        {
+          "name": "Check High-Entropy Passphrase",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"C0rrect-H0rse-B@ttery-St@ple-2026!#$\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/breach/password",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "breach", "password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Deepfake Forensics",
+      "item": [
+        {
+          "name": "Analyze Image (ELA & Noise)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n  \"filename\": \"sample.png\",\n  \"mimeType\": \"image/png\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/deepfake/scan",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "deepfake", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Analyze Video Container (Temporal Optical Flow)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAA==\",\n  \"filename\": \"synthetic_speech.mp4\",\n  \"mimeType\": \"video/mp4\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/deepfake/scan",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "deepfake", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Analyze Synthetic Audio (Spectral Centroid & Roll-Off)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=\",\n  \"filename\": \"voice_clone.wav\",\n  \"mimeType\": \"audio/wav\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/deepfake/scan",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "deepfake", "scan"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Misinformation Verifier",
+      "item": [
+        {
+          "name": "Verify Debunked Hoax (SimHash Match)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"claimText\": \"UNESCO declares Indian national anthem Jana Gana Mana as best national anthem in the world\",\n  \"context\": \"WHATSAPP_FORWARD\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/misinformation/check",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "misinformation", "check"]
+            }
+          }
+        },
+        {
+          "name": "Analyze Spliced TV News Chyron Typography",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"claimText\": \"BREAKING NEWS: Emergency curfew announced across city centers nationwide immediately!!!\",\n  \"context\": \"TELEVISION_SCREENSHOT\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/misinformation/check",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "misinformation", "check"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Cross-Modal Threat Fusion",
+      "item": [
+        {
+          "name": "Evaluate Multi-Vector Incident",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incidentId\": \"INC-POSTMAN-DEMO-001\",\n  \"verdicts\": [\n    {\n      \"module\": \"PHISHING\",\n      \"riskScore\": 95,\n      \"threatLevel\": \"DANGEROUS\",\n      \"verdict\": \"CREDENTIAL_HARVESTER\",\n      \"explanation\": \"Target domain actively mimics banking portal.\",\n      \"signals\": [],\n      \"latencyMs\": 1,\n      \"evaluatedAt\": \"2026-10-15T12:00:00Z\",\n      \"degraded\": false\n    },\n    {\n      \"module\": \"DEEPFAKE\",\n      \"riskScore\": 88,\n      \"threatLevel\": \"DANGEROUS\",\n      \"verdict\": \"SYNTHETIC_AVATAR\",\n      \"explanation\": \"Video exhibits unnatural facial micro-movement.\",\n      \"signals\": [],\n      \"latencyMs\": 12,\n      \"evaluatedAt\": \"2026-10-15T12:00:00Z\",\n      \"degraded\": false\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/fusion/evaluate",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "fusion", "evaluate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cryptographic Ledger",
+      "item": [
+        {
+          "name": "Inspect Ledger Tip & Ed25519 Signature",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/ledger/head",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "ledger", "head"]
+            }
+          }
+        },
+        {
+          "name": "Verify Entire Hash Chain Integrity",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/ledger/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "ledger", "verify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Cyber-Defense Bot",
+      "item": [
+        {
+          "name": "Interactive Chat Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Can you check if this URL is safe? https://secure-bank-login.xyz/verify\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/bot/chat",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "bot", "chat"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Gateway & Health",
+      "item": [
+        {
+          "name": "Gateway Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gateway_url}}/actuator/health",
+              "host": ["{{gateway_url}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
