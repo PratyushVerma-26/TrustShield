@@ -236,7 +236,7 @@ foreach ($svc in $Services) {
     Write-Host "  [+] Starting $name on port $port -> log: logs/$name.log" -ForegroundColor Green
 
     $proc = Start-Process -FilePath "java" `
-        -ArgumentList "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Dserver.port=$port", "-jar", "`"$jarFullPath`"" `
+        -ArgumentList "-Xmx512m", "-Dserver.port=$port", "-jar", "`"$jarFullPath`"" `
         -RedirectStandardOutput $logFile `
         -RedirectStandardError $errFile `
         -WorkingDirectory $RepoRoot `
@@ -250,7 +250,7 @@ foreach ($svc in $Services) {
 }
 
 if (-not $NoWait -and $startedCount -gt 0) {
-    $timeoutSeconds = 60
+    $timeoutSeconds = 120
     Write-Host "`nWaiting for all services to become healthy (timeout: ${timeoutSeconds}s)..." -ForegroundColor Cyan
     $startTime = Get-Date
 
@@ -266,6 +266,10 @@ if (-not $NoWait -and $startedCount -gt 0) {
             $svc = $pending[$i]
             if (Test-PortOpen $svc.Port) {
                 Write-Host "  [OK] $($svc.Name) ready on port $($svc.Port)" -ForegroundColor Green
+                $conn = Get-NetTCPConnection -LocalPort $svc.Port -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($conn -and $conn.OwningProcess) {
+                    $runningPids[$svc.Name] = $conn.OwningProcess
+                }
                 $pending.RemoveAt($i)
             }
         }

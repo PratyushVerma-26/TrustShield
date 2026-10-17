@@ -137,7 +137,7 @@ start_services() {
     fi
 
     echo "  Starting $svc on port $port..."
-    nohup java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -jar "$jar" > "$log_file" 2>&1 &
+    nohup java -Xmx512m -jar "$jar" > "$log_file" 2>&1 &
     local new_pid=$!
 
     if [ "$first" -eq 1 ]; then
@@ -155,7 +155,7 @@ start_services() {
     for svc in "${SERVICES[@]}"; do
       local port="${PORTS[$svc]}"
       local attempts=0
-      while ! test_port "$port" && [ "$attempts" -lt 30 ]; do
+      while ! test_port "$port" && [ "$attempts" -lt 120 ]; do
         sleep 1
         attempts=$((attempts + 1))
       done
