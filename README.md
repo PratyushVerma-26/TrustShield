@@ -117,20 +117,21 @@ Rather than opening separate terminal windows for each microservice, use `script
 It builds fat jars once and manages services as detached background processes with per-service logs in `logs/`:
 
 ```powershell
-# Build fat jars for all available modules
-.\scripts\run-all.ps1 -Build
+# Windows PowerShell:
+.\scripts\run-all.ps1 -Build    # Build fat JARs
+.\scripts\run-all.ps1           # Start all microservices in background
+.\scripts\run-all.ps1 -Status   # Inspect status and PIDs
+.\scripts\run-all.ps1 -Stop     # Stop all processes cleanly
+.\scripts\rehearsal.ps1         # Run automated end-to-end rehearsal & scorecard
+```
 
-# Start all built microservices in the background with health checks
-.\scripts\run-all.ps1
-
-# Inspect port listening status and PIDs
-.\scripts\run-all.ps1 -Status
-
-# Stop all running TrustShield processes cleanly
-.\scripts\run-all.ps1 -Stop
-
-# Run automated end-to-end rehearsal across all threat vectors & failure drills
-.\scripts\rehearsal.ps1
+For Linux / macOS / WSL:
+```bash
+chmod +x scripts/*.sh
+./scripts/run-all.sh --build    # Build fat JARs and launch
+./scripts/run-all.sh --status   # Inspect port status and PIDs
+./scripts/run-all.sh --stop     # Stop all processes cleanly
+./scripts/rehearsal.sh          # Run automated end-to-end rehearsal & scorecard
 ```
 
 ### Docker Multi-Container Mesh Orchestration
