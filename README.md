@@ -3,7 +3,20 @@
 An AI-powered system for real-time threat detection and protection against
 deepfakes, phishing, data breaches, and online misinformation.
 
-Java 21 · Spring Boot 3.3.2 · Maven multi-module monorepo
+Java 21 · Spring Boot 3.3.5 · Maven multi-module monorepo
+
+---
+
+## Deliverables & Documentation Index
+
+The following project documents provide complete coverage for academic review, viva-voce evaluation, and production deployment:
+
+- **[System Architecture Specification (ARCHITECTURE.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/ARCHITECTURE.md)**: Formal architecture specification, microservice topology, invariants, security models, mathematical proofs, and SLA benchmarks.
+- **[Evaluator Demonstration Runbook (DEMO_SCRIPT.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/DEMO_SCRIPT.md)**: End-to-end evaluator script with executable curl commands across all 7 threat vectors, ledger audit steps, bot flows, and failure drills.
+- **[Technical Presentation Deck (PRESENTATION_DECK.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/PRESENTATION_DECK.md)**: 13-slide evaluation deck summarizing project architecture, empirical benchmarks, and evaluation roadmap.
+- **[Capstone Project Report (docs/TRUSTSHIELD_FINAL_YEAR_PROJECT_REPORT.md)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/TRUSTSHIELD_FINAL_YEAR_PROJECT_REPORT.md)**: Comprehensive IEEE-referenced final year capstone project report.
+- **[Official Microsoft Word Report (docs/TrustShield_Final_Year_Project_Report.docx)](file:///C:/Users/Pratyush/Desktop/Trustsheild/docs/TrustShield_Final_Year_Project_Report.docx)**: Pre-formatted docx report with formal typography, headers, footers, tables, and list of abbreviations.
+- **[Automated Failure Drills Suite (scripts/test_failure_drills.ps1)](file:///C:/Users/Pratyush/Desktop/Trustsheild/scripts/test_failure_drills.ps1)**: Automated test harness validating the 4 core platform safety and resilience invariants.
 
 ---
 
@@ -14,7 +27,7 @@ TrustShield provides real-time threat detection across seven specialized service
 | Module | Status | What actually works |
 |---|---|---|
 | `trustshield-common` | **Working** | Shared verdict/signal types, IncidentId correlation, and contracts for all modules |
-| `trustshield-gateway` | **Working** | Reverse proxy on port 8080, unified CORS, downstream routing, structured 503 degradation |
+| `trustshield-gateway` | **Working** | Reverse proxy on port 8080, unified CORS, token bucket rate limiter, security headers, structured 503 degradation |
 | `trustshield-phishing-service` | **Working** | 26-feature lexical classifier, dynamic Safe Browsing & VirusTotal reputation enrichment, raise-only invariant, REST API, scan history, explainability, tests |
 | `trustshield-breach-service` | **Working** | Password exposure via HIBP k-anonymity + offline catalog, email breach lookup, structural password analysis, audit trail, tests |
 | `trustshield-deepfake-service` | **Working** | Multimodal image and video forensics: Pure Java ISO BMFF container parser, video temporal jitter & inter-frame residual divergence analysis, multi-language acoustic biophysics forensics (HiFi-GAN/WaveGlow spectral roll-off, robotic pitch micro-tremor, digital silence dynamics), C2PA trust registry & internet directory connectivity, 6 image forensic signals, UNKNOWN degradation invariant, H2 persistence, 30 tests |
@@ -57,7 +70,7 @@ that would have contradicted the project's "real-time" claim.
 Verify:
 
 ```bash
-java -version     # must report 21
+java -version     # must report 21 or 22
 mvn -version
 ```
 
@@ -71,7 +84,7 @@ From the repository root:
 mvn clean install
 ```
 
-Expected on success: `BUILD SUCCESS` with 196 passing tests across nine
+Expected on success: `BUILD SUCCESS` with 197 passing tests across all
 active artifacts — `trustshield-common`, `trustshield-phishing-service`,
 `trustshield-breach-service`, `trustshield-gateway`,
 `trustshield-deepfake-service`, `trustshield-fakenews-service`,
