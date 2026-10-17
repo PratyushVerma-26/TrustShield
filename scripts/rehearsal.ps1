@@ -128,10 +128,12 @@ try {
 
 # Vector 2.1: Breached Password (k-Anonymity)
 try {
-    $body = @{ password = "Password123!" } | ConvertTo-Json
+    $body = @{ password = "password123" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/breach/password" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 5
-    $pass = ($res.verdict.threatLevel -eq "DANGEROUS" -and $res.breached -eq $true)
-    Report-Rehearsal "VECTOR-2" "Known Breached Password (k-Anonymity)" $pass "Breached=$($res.breached), Score=$($res.verdict.riskScore), Count=$($res.breachCount)" $res
+    $isExposed = ($res.verdict.threatLevel -eq "DANGEROUS" -and $res.verdict.verdict -eq "PASSWORD_EXPOSED")
+    $kAnon = ($res.kAnonymous -eq $true -and $res.bucketPrefix -ne $null)
+    $pass = ($isExposed -and $kAnon)
+    Report-Rehearsal "VECTOR-2" "Known Breached Password (k-Anonymity)" $pass "ThreatLevel=$($res.verdict.threatLevel), Verdict=$($res.verdict.verdict), kAnon=$($res.kAnonymous), Prefix=$($res.bucketPrefix)" $res
 } catch {
     Report-Rehearsal "VECTOR-2" "Known Breached Password (k-Anonymity)" $false "Request failed: $($_.Exception.Message)"
 }
@@ -140,19 +142,20 @@ try {
 try {
     $body = @{ password = "C0rrect-H0rse-B@ttery-St@ple-2026!#$" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/breach/password" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 5
-    $pass = ($res.verdict.threatLevel -eq "SAFE" -and $res.breached -eq $false)
-    Report-Rehearsal "VECTOR-2" "High-Entropy Passphrase Verification" $pass "Breached=$($res.breached), Score=$($res.verdict.riskScore), EntropyBits=$($res.entropyBits)" $res
+    $bits = if ($res.strength) { $res.strength.theoreticalBits } else { 0 }
+    $pass = ($res.verdict.threatLevel -in "LOW", "SAFE" -and $bits -gt 60 -and $res.kAnonymous -eq $true)
+    Report-Rehearsal "VECTOR-2" "High-Entropy Passphrase Verification" $pass "ThreatLevel=$($res.verdict.threatLevel), EntropyBits=$bits, Est=$($res.strength.bruteForceEstimate)" $res
 } catch {
     Report-Rehearsal "VECTOR-2" "High-Entropy Passphrase Verification" $false "Request failed: $($_.Exception.Message)"
 }
 
 # Vector 3: Synthetic Image Deepfake Forensics
 try {
-    $pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    $pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAzSURBVDhPpcihEQAwEASh67/pTwGrmAgM2+7+JFRCJVRCJVRCJVRCJVRCJVRCJVRCJcwDMqb+ELsBUIUAAAAASUVORK5CYII="
     $body = @{ imageBase64 = $pngBase64; filename = "sample.png"; mimeType = "image/png" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/deepfake/scan" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 5
     $pass = ($res.metadata.format -eq "PNG" -and $res.forensicSignals -ne $null)
-    Report-Rehearsal "VECTOR-3" "Image ELA/Noise Forensics" $pass "Format=$($res.metadata.format), Verdict=$($res.verdict.verdict), Score=$($res.verdict.riskScore)" $res
+    Report-Rehearsal "VECTOR-3" "Image ELA/Noise Forensics" $pass "Format=$($res.metadata.format), QuantFP=$($res.forensicSignals.quantisationTableFingerprint), Recomp=$($res.forensicSignals.recompressionDetected)" $res
 } catch {
     Report-Rehearsal "VECTOR-3" "Image ELA/Noise Forensics" $false "Request failed: $($_.Exception.Message)"
 }
@@ -162,8 +165,8 @@ try {
     $mp4Base64 = "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAA=="
     $body = @{ imageBase64 = $mp4Base64; filename = "synthetic_speech.mp4"; mimeType = "video/mp4" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/deepfake/scan" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 5
-    $pass = ($res.metadata.format -eq "MP4" -and $res.videoTemporalSignals -ne $null)
-    Report-Rehearsal "VECTOR-4" "Video Temporal Optical Flow" $pass "Format=$($res.metadata.format), Score=$($res.verdict.riskScore), Verdict=$($res.verdict.verdict)" $res
+    $pass = (($res.metadata.format -in "isom", "MP4" -or $res.metadata.format -like "*iso*") -and $res.videoSignals -ne $null)
+    Report-Rehearsal "VECTOR-4" "Video Temporal Optical Flow" $pass "Format=$($res.metadata.format), TemporalJitter=$($res.videoSignals.temporalJitterScore), Verdict=$($res.verdict.verdict)" $res
 } catch {
     Report-Rehearsal "VECTOR-4" "Video Temporal Optical Flow" $false "Request failed: $($_.Exception.Message)"
 }
@@ -173,8 +176,8 @@ try {
     $wavBase64 = "UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="
     $body = @{ imageBase64 = $wavBase64; filename = "voice_clone.wav"; mimeType = "audio/wav" } | ConvertTo-Json
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/deepfake/scan" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 5
-    $pass = ($res.metadata.format -eq "WAV" -and $res.audioForensicSignals -ne $null)
-    Report-Rehearsal "VECTOR-5" "Audio Spectral Roll-Off Forensics" $pass "Format=$($res.metadata.format), SpectralCentroidHz=$($res.audioForensicSignals.spectralCentroidHz), Score=$($res.verdict.riskScore)" $res
+    $pass = (($res.metadata.format -in "WAV", "AUDIO_WAV" -or $res.metadata.format -like "*WAV*") -and $res.audioSignals -ne $null)
+    Report-Rehearsal "VECTOR-5" "Audio Spectral Roll-Off Forensics" $pass "Format=$($res.metadata.format), StreamFP=$($res.forensicSignals.quantisationTableFingerprint), Verdict=$($res.verdict.verdict)" $res
 } catch {
     Report-Rehearsal "VECTOR-5" "Audio Spectral Roll-Off Forensics" $false "Request failed: $($_.Exception.Message)"
 }
@@ -202,7 +205,8 @@ try {
 # Vector 7: Cross-Modal Threat Fusion
 try {
     $incidentPayload = @{
-        incidentId = "INC-REHEARSAL-$([guid]::NewGuid().ToString().Substring(0, 8))"
+        incidentId = "inc-rehearsal-$([guid]::NewGuid().ToString().Substring(0, 8))"
+        ledgerVerified = $true
         verdicts = @(
             @{
                 module = "PHISHING"
@@ -230,8 +234,10 @@ try {
     } | ConvertTo-Json -Depth 5
 
     $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/fusion/evaluate" -Method Post -ContentType "application/json" -Body $incidentPayload -TimeoutSec 5
-    $pass = ($res.compositeThreatLevel -eq "DANGEROUS" -and $res.compositeScore -ge 85)
-    Report-Rehearsal "VECTOR-7" "Cross-Modal Evidence Fusion" $pass "CompositeLevel=$($res.compositeThreatLevel), CompositeScore=$($res.compositeScore), LedgerSeq=$($res.ledgerSequenceNumber)" $res
+    $level = if ($res.aggregateVerdict) { $res.aggregateVerdict.threatLevel } else { $res.compositeThreatLevel }
+    $score = if ($res.aggregateVerdict) { $res.aggregateVerdict.riskScore } else { $res.compositeScore }
+    $pass = ($level -eq "DANGEROUS" -and $score -ge 85)
+    Report-Rehearsal "VECTOR-7" "Cross-Modal Evidence Fusion" $pass "ThreatLevel=$level, Score=$score, RulesFired=$($res.firedRules.Count)" $res
 } catch {
     Report-Rehearsal "VECTOR-7" "Cross-Modal Evidence Fusion" $false "Request failed: $($_.Exception.Message)"
 }

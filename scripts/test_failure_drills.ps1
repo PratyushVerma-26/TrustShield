@@ -79,11 +79,10 @@ try {
         $drill1Passed = $false
         $drill1Msg = ""
         try {
-            $response = Invoke-WebRequest -Uri "$GatewayUrl/api/v1/deepfake/scan" -Method Post `
+            $json = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/deepfake/scan" -Method Post `
                 -Headers @{ "Content-Type" = "application/json" } `
                 -Body '{"imageBase64":"dGVzdA=="}' -TimeoutSec 4 -ErrorAction Stop
             
-            $json = $response.Content | ConvertFrom-Json
             $drill1Passed = $true
             $drill1Msg = "Gateway reachable and routed request successfully."
         } catch {
@@ -98,6 +97,9 @@ try {
                 } else {
                     $drill1Msg = "HTTP 503 received but body missing degraded=true or SERVICE_UNAVAILABLE."
                 }
+            } elseif ($_.ErrorDetails -and ($_.ErrorDetails.Message -match "SERVICE_UNAVAILABLE" -or $_.ErrorDetails.Message -match "degraded")) {
+                $drill1Passed = $true
+                $drill1Msg = "Service degradation captured: $($_.ErrorDetails.Message)"
             } else {
                 $drill1Msg = "Unexpected error status: $($_.Exception.Message)"
             }

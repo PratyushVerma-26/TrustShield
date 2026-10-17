@@ -6,10 +6,15 @@
 
 set -eo pipefail
 
-GATEWAY_URL="${1:-http://localhost:8080}"
-DEEPFAKE_URL="${2:-http://localhost:8085}"
-FAKENEWS_URL="${3:-http://localhost:8086}"
-INTEGRITY_URL="${4:-http://localhost:8087}"
+CURL_BIN="curl"
+if command -v curl.exe >/dev/null 2>&1; then
+  CURL_BIN="curl.exe"
+fi
+
+GATEWAY_URL="${1:-http://127.0.0.1:8080}"
+DEEPFAKE_URL="${2:-http://127.0.0.1:8085}"
+FAKENEWS_URL="${3:-http://127.0.0.1:8086}"
+INTEGRITY_URL="${4:-http://127.0.0.1:8087}"
 
 echo "================================================================="
 echo "  TrustShield Resilience & Failure Drill Validation Suite (POSIX)"
@@ -47,8 +52,8 @@ report_skip() {
 
 # --- DRILL 1: Service Unavailability Degraded Handling ---
 echo "[1/4] Running Drill 1: Downstream Service Unavailability..."
-if curl -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
-  RESP=$(curl -s -w "\n%{http_code}" -X POST "$GATEWAY_URL/api/v1/deepfake/scan" \
+if $CURL_BIN -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
+  RESP=$($CURL_BIN -s -w "\n%{http_code}" -X POST "$GATEWAY_URL/api/v1/deepfake/scan" \
     -H "Content-Type: application/json" \
     -d '{"imageBase64":"dGVzdA=="}' || true)
   STATUS_CODE=$(echo "$RESP" | tail -n1)
@@ -69,12 +74,12 @@ fi
 echo ""
 echo "[2/4] Running Drill 2: Cryptographic Ledger Tamper Evidence..."
 VERIFY_URL="$GATEWAY_URL/api/v1/ledger/verify"
-if ! curl -s -f -m 3 "$VERIFY_URL" >/dev/null 2>&1; then
+if ! $CURL_BIN -s -f -m 3 "$VERIFY_URL" >/dev/null 2>&1; then
   VERIFY_URL="$INTEGRITY_URL/api/v1/ledger/verify"
 fi
 
-if curl -s -f -m 3 "$VERIFY_URL" >/dev/null 2>&1; then
-  AUDIT_RESP=$(curl -s -m 3 "$VERIFY_URL")
+if $CURL_BIN -s -f -m 3 "$VERIFY_URL" >/dev/null 2>&1; then
+  AUDIT_RESP=$($CURL_BIN -s -m 3 "$VERIFY_URL")
   if echo "$AUDIT_RESP" | grep -q '"valid":true' && echo "$AUDIT_RESP" | grep -q '"signatureValid":true'; then
     report_result "Drill 2 - Cryptographic Hash Chain Integrity" 1 "Ledger chain verified intact. Ed25519 signature valid."
   else
@@ -90,9 +95,9 @@ echo "[3/4] Running Drill 3: Destructive Recompression UNKNOWN Invariant..."
 DEEPFAKE_ENDPOINT="$GATEWAY_URL/api/v1/deepfake/scan"
 B64="/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="
 
-if curl -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
+if $CURL_BIN -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
   PAYLOAD="{\"imageBase64\":\"$B64\",\"filename\":\"whatsapp_image.jpg\",\"mimeType\":\"image/jpeg\",\"context\":\"WHATSAPP_ATTACHMENT\"}"
-  RECOMP_RESP=$(curl -s -m 5 -X POST "$DEEPFAKE_ENDPOINT" -H "Content-Type: application/json" -d "$PAYLOAD" || true)
+  RECOMP_RESP=$($CURL_BIN -s -m 5 -X POST "$DEEPFAKE_ENDPOINT" -H "Content-Type: application/json" -d "$PAYLOAD" || true)
 
   if echo "$RECOMP_RESP" | grep -q '"threatLevel":"UNKNOWN"' && echo "$RECOMP_RESP" | grep -q '"degraded":true'; then
     report_result "Drill 3 - Destructive Recompression" 1 "ThreatLevel=UNKNOWN, Degraded=True. Zero false-safe invariant preserved."
@@ -109,8 +114,8 @@ echo "[4/4] Running Drill 4: Disabled / Unindexed Fact-Check Directory..."
 CLAIM_ENDPOINT="$GATEWAY_URL/api/v1/misinformation/check"
 CLAIM_BODY='{"claimText":"Civic municipal garden will be closed next Wednesday afternoon for routine hedge maintenance.","context":"LOCAL_BULLETIN"}'
 
-if curl -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
-  CLAIM_RESP=$(curl -s -m 5 -X POST "$CLAIM_ENDPOINT" -H "Content-Type: application/json" -d "$CLAIM_BODY" || true)
+if $CURL_BIN -s -f -m 3 "$GATEWAY_URL/actuator/health" >/dev/null 2>&1; then
+  CLAIM_RESP=$($CURL_BIN -s -m 5 -X POST "$CLAIM_ENDPOINT" -H "Content-Type: application/json" -d "$CLAIM_BODY" || true)
 
   if echo "$CLAIM_RESP" | grep -q '"threatLevel":"UNKNOWN"' && echo "$CLAIM_RESP" | grep -q '"degraded":true'; then
     report_result "Drill 4 - Unindexed Claim Fact-Check Invariant" 1 "ThreatLevel=UNKNOWN, Degraded=True. Zero false-safe invariant enforced."
