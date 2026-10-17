@@ -24,7 +24,13 @@ export const App: React.FC = () => {
   const [gatewayOnline, setGatewayOnline] = useState<boolean | null>(null);
 
   // Initialize TrustShield typed API client connecting to single-origin Gateway (:8080)
-  const client = useMemo(() => new TrustShieldApiClient(), []);
+  // Supports VITE_GATEWAY_URL for public standalone hosting (Vercel/Netlify)
+  const client = useMemo(() => {
+    const envUrl = (import.meta as any).env?.VITE_GATEWAY_URL;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const baseUrl = envUrl || (origin.includes('5173') ? 'http://localhost:8080' : origin || 'http://localhost:8080');
+    return new TrustShieldApiClient({ baseUrl });
+  }, []);
 
   useEffect(() => {
     // Check gateway status

@@ -88,6 +88,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Verify Mobile App Type Safety
+        working-directory: packages/mobile-app
+        run: |
+          npm ci
+          npx tsc --noEmit
+
   # ============================================================================
   # 4. Docker Compose & Container Orchestration Validation
   # ============================================================================

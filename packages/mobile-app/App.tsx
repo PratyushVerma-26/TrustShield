@@ -18,16 +18,17 @@ import {
   formatDisplayScore,
   ThreatLevel
 } from '@trustshield/verdict-core';
+import { GATEWAY_BASE_URL } from './src/config';
 
 type Tab = 'phishing' | 'breach' | 'deepfake' | 'fakenews' | 'fusion' | 'ledger';
 
 export default function App() {
-  const [gatewayUrl, setGatewayUrl] = useState('http://localhost:8080');
+  const [gatewayUrl, setGatewayUrl] = useState(GATEWAY_BASE_URL);
   const [activeTab, setActiveTab] = useState<Tab>('phishing');
   const [gatewayOnline, setGatewayOnline] = useState<boolean | null>(null);
 
   // Dynamic API client bound to user-configured gateway URL (LAN IP or emulator)
-  const client = useMemo(() => new TrustShieldApiClient(gatewayUrl), [gatewayUrl]);
+  const client = useMemo(() => new TrustShieldApiClient({ baseUrl: gatewayUrl }), [gatewayUrl]);
 
   useEffect(() => {
     client.getGatewayHealth()
@@ -105,7 +106,7 @@ export default function App() {
     if (!claimText) return;
     setClaimLoading(true);
     try {
-      const res = await client.checkClaim({ text: claimText });
+      const res = await client.checkClaim({ claimText });
       setClaimResult(res);
     } catch (e: any) {
       setClaimResult({ error: e.message || String(e) });
@@ -117,6 +118,7 @@ export default function App() {
   const handleFusionDemo = async () => {
     setFusionLoading(true);
     try {
+      const now = new Date().toISOString();
       const res = await client.evaluateFusion([
         {
           module: 'PHISHING',
@@ -126,6 +128,7 @@ export default function App() {
           explanation: 'Elevated character entropy in subdomain',
           signals: [],
           latencyMs: 3,
+          evaluatedAt: now,
           degraded: false
         },
         {
@@ -136,6 +139,7 @@ export default function App() {
           explanation: 'Spatial noise residual lacks organic sensor variance',
           signals: [],
           latencyMs: 14,
+          evaluatedAt: now,
           degraded: false
         }
       ], true);
