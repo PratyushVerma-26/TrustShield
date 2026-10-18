@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="breachDangerBg" cx="50%" cy="50%" r="85%">
+      <stop offset="0%" stop-color="#550808" />
+      <stop offset="60%" stop-color="#220202" />
+      <stop offset="100%" stop-color="#0a0000" />
+    </radialGradient>
+    <filter id="dangerMeshGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#breachDangerBg)" />
+
+  <!-- The Broken / Permeable Sieve in Center with Breached Data Slipping Freely Through -->
+  <g transform="translate(960, 520)">
+    <!-- Torn Crimson Sieve Grid in Center -->
+    <ellipse cx="0" cy="0" rx="600" ry="140" fill="rgba(127, 29, 29, 0.45)" stroke="#ef4444" stroke-width="6" filter="url(#dangerMeshGlow)" />
+    <!-- Big Sieve Hole / Breach Rift Dead Center -->
+    <ellipse cx="0" cy="0" rx="220" ry="60" fill="#450a0a" stroke="#f87171" stroke-width="4.5" stroke-dasharray="12 8" />
+    
+    <!-- User Credential Falling Straight Down Through the Sieve Hole -->
+    <g transform="translate(0, 160)">
+      <rect x="-260" y="-40" width="520" height="80" rx="16" fill="#7f1d1d" stroke="#fca5a5" stroke-width="4" filter="url(#dangerMeshGlow)" />
+      <text x="0" y="10" font-family="monospace" font-size="22" fill="#fee2e2" font-weight="900" text-anchor="middle">
+        ⚠️ LEAKED: EXPOSED IN PUBLIC BREACH
+      </text>
+      <!-- Downward Leakage Trails -->
+      <line x1="-150" y1="-120" x2="-150" y2="-40" stroke="#f87171" stroke-width="4" stroke-dasharray="8 6" />
+      <line x1="0" y1="-140" x2="0" y2="-40" stroke="#f87171" stroke-width="6" stroke-dasharray="8 6" />
+      <line x1="150" y1="-120" x2="150" y2="-40" stroke="#f87171" stroke-width="4" stroke-dasharray="8 6" />
+    </g>
+
+    <text x="0" y="280" font-family="sans-serif" font-size="22" fill="#fca5a5" font-weight="900" text-anchor="middle" letter-spacing="1">
+      🚨 SIEVE COMPROMISED: CREDENTIAL SLIPPED THROUGH HACKER DUMPS!
+    </text>
+  </g>
+</svg>

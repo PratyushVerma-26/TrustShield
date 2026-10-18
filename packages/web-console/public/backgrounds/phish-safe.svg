@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="natureSafe" cx="50%" cy="40%" r="85%">
+      <stop offset="0%" stop-color="#054832" />
+      <stop offset="50%" stop-color="#022117" />
+      <stop offset="100%" stop-color="#01120c" />
+    </radialGradient>
+    <linearGradient id="vineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="safeGlow">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#natureSafe)" />
+
+  <!-- Enlarged Centered Water Vine Flow -->
+  <g transform="translate(960, 0)">
+    <!-- Organic Curving Natural Water Vine -->
+    <path d="M 0 0 Q -120 250 0 540 Q 120 800 0 1080" stroke="url(#vineGrad)" stroke-width="12" fill="none" stroke-linecap="round" filter="url(#safeGlow)" />
+    
+    <!-- Large Centered Vine Leaves -->
+    <path d="M -40 220 C -120 180, -140 280, -30 270 Z" fill="#10b981" opacity="0.85" />
+    <path d="M 40 380 C 120 340, 140 440, 30 430 Z" fill="#34d399" opacity="0.85" />
+    <path d="M -40 680 C -120 640, -140 740, -30 730 Z" fill="#10b981" opacity="0.85" />
+    <path d="M 40 840 C 120 800, 140 900, 30 890 Z" fill="#34d399" opacity="0.85" />
+  </g>
+
+  <!-- Big Glowing Clean Security Shield Badge Directly in Center -->
+  <g transform="translate(960, 520)" filter="url(#safeGlow)">
+    <circle cx="0" cy="0" r="220" fill="#064e3b" stroke="#34d399" stroke-width="6" />
+    <circle cx="0" cy="0" r="190" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-dasharray="12 12" />
+    <!-- Checkmark -->
+    <path d="M -70 -10 L -15 50 L 85 -55" fill="none" stroke="#6ee7b7" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Safe Legend -->
+    <text x="0" y="115" font-family="sans-serif" font-size="24" fill="#d1fae5" font-weight="900" text-anchor="middle" letter-spacing="2">
+      GENUINE &amp; SAFE LINK
+    </text>
+    <text x="0" y="150" font-family="monospace" font-size="15" fill="#a7f3d0" text-anchor="middle" opacity="0.9">
+      Natural Vine Flow • No Hook • Safe to Proceed
+    </text>
+  </g>
+</svg>

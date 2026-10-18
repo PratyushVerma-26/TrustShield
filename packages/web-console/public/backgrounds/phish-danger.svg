@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="dangerOcean" cx="50%" cy="40%" r="85%">
+      <stop offset="0%" stop-color="#550808" />
+      <stop offset="50%" stop-color="#280303" />
+      <stop offset="100%" stop-color="#0d0000" />
+    </radialGradient>
+    <filter id="dangerGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#dangerOcean)" />
+
+  <!-- The Dark Cloaked Attacker Hooking Down Dead Center -->
+  <g transform="translate(960, 40)">
+    <!-- Ominous Red Rod -->
+    <path d="M -200 120 L 40 -20 L 260 -60" stroke="#ef4444" stroke-width="10" stroke-linecap="round" fill="none" filter="url(#dangerGlow)" />
+    <!-- Menacing Hacker Hooded Figure in Center -->
+    <path d="M -260 260 C -260 140, -200 90, -110 90 C -20 90, 40 140, 40 260 Z" fill="#180303" stroke="#dc2626" stroke-width="5" />
+    <circle cx="-110" cy="55" r="42" fill="#2d0606" stroke="#ef4444" stroke-width="3" />
+    <!-- Glowing Red Eyes -->
+    <ellipse cx="-125" cy="55" rx="6" ry="3" fill="#f87171" />
+    <ellipse cx="-95" cy="55" rx="6" ry="3" fill="#f87171" />
+  </g>
+
+  <!-- Blood-Red Razor Hook Dropping in Center -->
+  <path d="M 1220 -20 Q 1040 240 960 440" stroke="#f87171" stroke-width="6" fill="none" filter="url(#dangerGlow)" />
+  <g transform="translate(960, 440)">
+    <path d="M 0 0 V 65 C 0 115, 70 115, 70 65 C 70 35, 50 28, 40 45" fill="none" stroke="#ef4444" stroke-width="9" stroke-linecap="round" />
+    <polygon points="40,45 35,25 60,30" fill="#ef4444" />
+  </g>
+
+  <!-- Toxic Phishing Lure Snapped Center -->
+  <g transform="translate(960, 560)" filter="url(#dangerGlow)">
+    <rect x="-300" y="-50" width="600" height="100" rx="18" fill="#3b0707" stroke="#ef4444" stroke-width="4.5" />
+    <text x="0" y="12" font-family="JetBrains Mono, monospace" font-size="24" fill="#fca5a5" font-weight="900" text-anchor="middle">
+      ☠ DANGEROUS ATTACKER PHISHING LURE!
+    </text>
+  </g>
+
+  <!-- User Hand Caught in Center -->
+  <g transform="translate(960, 780)">
+    <path d="M -180 280 Q -60 140 0 50" stroke="#7f1d1d" stroke-width="42" stroke-linecap="round" fill="none" />
+    <text x="0" y="-70" font-family="sans-serif" font-size="20" fill="#f87171" font-weight="900" text-anchor="middle" letter-spacing="1">
+      🚨 TRAP TRIGGERED: CYBERCRIMINAL FISHING LINE DETECTED!
+    </text>
+  </g>
+</svg>

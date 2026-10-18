@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="deskMonitorBg" cx="50%" cy="50%" r="85%">
+      <stop offset="0%" stop-color="#21183b" />
+      <stop offset="60%" stop-color="#0c0916" />
+      <stop offset="100%" stop-color="#030205" />
+    </radialGradient>
+    <filter id="monitorGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#deskMonitorBg)" />
+
+  <!-- Huge Enlarged Monitor Screen Dead Center -->
+  <g transform="translate(960, 520)">
+    <!-- Monitor Stand -->
+    <rect x="-50" y="270" width="100" height="90" fill="#334155" rx="6" />
+    <ellipse cx="0" cy="360" rx="150" ry="30" fill="#1e293b" stroke="#475569" stroke-width="3" />
+
+    <!-- Big Sleek PC Monitor Bezel (Desktop Screen) Enlarged Center -->
+    <rect x="-420" y="-270" width="840" height="540" rx="24" fill="#0f172a" stroke="#c084fc" stroke-width="4.5" filter="url(#monitorGlow)" />
+    <!-- Display Panel -->
+    <rect x="-390" y="-240" width="780" height="480" rx="14" fill="#090514" />
+
+    <!-- Incoming Media Transfer Window (Video / Image File Arriving) -->
+    <rect x="-340" y="-200" width="680" height="110" rx="16" fill="#1e1333" stroke="#a855f7" stroke-width="3" />
+    <text x="-300" y="-132" font-family="sans-serif" font-size="44">📹</text>
+    <text x="-230" y="-150" font-family="JetBrains Mono, monospace" font-size="22" fill="#f3e8ff" font-weight="900">
+      Incoming Media: viral_video_forward.mp4
+    </text>
+    <text x="-230" y="-118" font-family="sans-serif" font-size="16" fill="#d8b4fe">
+      Received via messaging forward • 12.4 MB • High-Resolution Clip
+    </text>
+
+    <!-- Synthetic Forensic Inspection Circle with Question Mark of Authenticity -->
+    <g transform="translate(0, 50)">
+      <circle cx="0" cy="0" r="85" fill="rgba(192, 132, 252, 0.2)" stroke="#c084fc" stroke-width="4.5" />
+      <text x="0" y="30" font-family="sans-serif" font-size="95" fill="#e9d5ff" font-weight="900" text-anchor="middle">
+        ?
+      </text>
+    </g>
+
+    <text x="0" y="195" font-family="sans-serif" font-size="20" fill="#c084fc" font-weight="900" text-anchor="middle" letter-spacing="1">
+      IS THIS MEDIA GENUINE OR AN AI DEEPFAKE?
+    </text>
+  </g>
+</svg>

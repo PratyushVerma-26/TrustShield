@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="deepfakeSafeBg" cx="50%" cy="50%" r="85%">
+      <stop offset="0%" stop-color="#054430" />
+      <stop offset="60%" stop-color="#021c13" />
+      <stop offset="100%" stop-color="#010c08" />
+    </radialGradient>
+    <filter id="safeGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#deepfakeSafeBg)" />
+
+  <!-- Huge Enlarged Monitor Screen Dead Center -->
+  <g transform="translate(960, 520)">
+    <!-- Monitor Stand -->
+    <rect x="-50" y="270" width="100" height="90" fill="#334155" rx="6" />
+    <ellipse cx="0" cy="360" rx="150" ry="30" fill="#1e293b" />
+
+    <!-- Monitor Bezel Glowing Green -->
+    <rect x="-420" y="-270" width="840" height="540" rx="24" fill="#064e3b" stroke="#34d399" stroke-width="5" filter="url(#safeGlow)" />
+    <!-- Display Panel -->
+    <rect x="-390" y="-240" width="780" height="480" rx="14" fill="#022c22" />
+
+    <!-- Incoming Media Transfer Window -->
+    <rect x="-340" y="-200" width="680" height="110" rx="16" fill="#047857" stroke="#6ee7b7" stroke-width="3" />
+    <text x="-300" y="-132" font-family="sans-serif" font-size="44">📹</text>
+    <text x="-230" y="-150" font-family="JetBrains Mono, monospace" font-size="22" fill="#ecfdf5" font-weight="900">
+      Inspected Media: viral_video_forward.mp4
+    </text>
+    <text x="-230" y="-118" font-family="sans-serif" font-size="16" fill="#a7f3d0">
+      Biometric Camera Sensor Noise &amp; Acoustic Micro-Tremors Genuine
+    </text>
+
+    <!-- QUESTION MARK TURNS INTO A BIG GLOWING AUTHENTIC CHECKMARK -->
+    <g transform="translate(0, 50)">
+      <circle cx="0" cy="0" r="85" fill="rgba(16, 185, 129, 0.25)" stroke="#34d399" stroke-width="4.5" />
+      <path d="M -35 0 L -12 24 L 35 -24" fill="none" stroke="#34d399" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+
+    <text x="0" y="195" font-family="sans-serif" font-size="22" fill="#6ee7b7" font-weight="900" text-anchor="middle" letter-spacing="1">
+      ✓ GENUINE &amp; AUTHENTIC RECORDING (SAFE)
+    </text>
+  </g>
+</svg>

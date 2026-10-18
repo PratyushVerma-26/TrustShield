@@ -1,63 +1,17 @@
 import React, { useState } from 'react';
 import { TrustShieldApiClient, DeepfakeScanResponse } from '@trustshield/verdict-core';
-import { VerdictBadge } from './VerdictBadge.tsx';
-import { Film, Image as ImageIcon, Volume2, AlertTriangle, Upload } from 'lucide-react';
+import { Film, Upload, RefreshCw, FileCheck, ShieldAlert, ShieldCheck, ExternalLink, AlertTriangle, PhoneCall } from 'lucide-react';
 
 interface Props {
   client: TrustShieldApiClient;
+  onResultChange?: (status: 'idle' | 'safe' | 'danger') => void;
 }
 
-export const DeepfakePanel: React.FC<Props> = ({ client }) => {
+export const DeepfakePanel: React.FC<Props> = ({ client, onResultChange }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DeepfakeScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFilename, setSelectedFilename] = useState('minister_announcement.mp4');
-
-  // Sample synthetic media presets
-  const samples = [
-    {
-      label: 'Deepfake Video (Voice Clone)',
-      filename: 'minister_speech_spliced.mp4',
-      mediaType: 'VIDEO',
-      base64: 'AAAAIGZ0eXBtcDQyAAAAAG1wNDJpc29tYXZjMQAA'
-    },
-    {
-      label: 'Tampered Face Swap (JPEG)',
-      filename: 'face_swap_manipulated.jpg',
-      mediaType: 'IMAGE',
-      base64: '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgF'
-    },
-    {
-      label: 'Clean Authentic Photo (C2PA)',
-      filename: 'press_conference_verified.jpg',
-      mediaType: 'IMAGE',
-      base64: '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwG'
-    },
-    {
-      label: 'Recompressed WhatsApp Image',
-      filename: 'whatsapp_lossy_forward.jpg',
-      mediaType: 'IMAGE',
-      base64: '/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQN'
-    }
-  ];
-
-  const handleScanSample = async (sample: typeof samples[0]) => {
-    setSelectedFilename(sample.filename);
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await client.scanMedia({
-        base64: sample.base64,
-        filename: sample.filename,
-        mediaType: sample.mediaType
-      });
-      setResult(res);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectedFilename, setSelectedFilename] = useState<string | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,6 +34,9 @@ export const DeepfakePanel: React.FC<Props> = ({ client }) => {
           mediaType: mType
         });
         setResult(res);
+        const isDeepfakeRes = res.verdict.threatLevel === 'DANGEROUS' || res.verdict.riskScore >= 60;
+        const isAuthenticRes = res.verdict.threatLevel === 'SAFE' || res.verdict.riskScore < 35;
+        if (onResultChange) onResultChange(isDeepfakeRes ? 'danger' : isAuthenticRes ? 'safe' : 'idle');
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -89,205 +46,172 @@ export const DeepfakePanel: React.FC<Props> = ({ client }) => {
     reader.readAsDataURL(file);
   };
 
+  const isDeepfake = result && (result.verdict.threatLevel === 'DANGEROUS' || result.verdict.riskScore >= 60);
+  const isAuthentic = result && (result.verdict.threatLevel === 'SAFE' || result.verdict.threatLevel === 'LOW' || result.verdict.riskScore < 35);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Header */}
-      <div style={{ backgroundColor: 'var(--bg-card)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <Film style={{ color: 'var(--color-danger)' }} size={24} />
+      <div className="cyber-card" style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.25rem' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '0.5rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #DC2626' }}>
+            <Film style={{ color: '#F87171' }} size={22} />
+          </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Deepfake & Synthetic Media Forensic Detector</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-              ISO BMFF temporal analysis, biophysics audio forensics (spectral roll-off, robotic pitch micro-tremor), and 6 inspectable visual signals.
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>Deepfake &amp; Fake Media Detector</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Check if an image, video, or voice recording is genuine or AI-manipulated/deepfaked.
             </p>
           </div>
         </div>
 
-        {/* Upload and Sample Buttons */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Upload Zone */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <label
             style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#1E293B',
-              color: '#38BDF8',
-              border: '1px dashed #0284C7',
-              borderRadius: '0.5rem',
+              padding: '1.75rem 2rem',
+              backgroundColor: 'var(--bg-input)',
+              border: '2px dashed var(--border-light)',
+              borderRadius: '0.75rem',
+              color: '#FFFFFF',
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.5rem'
+              justifyContent: 'center',
+              gap: '0.75rem',
+              transition: 'all 0.2s ease',
+              textAlign: 'center'
             }}
           >
-            <Upload size={18} />
-            Upload File (Image/Video/Audio)
-            <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} accept="image/*,video/*,audio/*" />
-          </label>
-
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>or choose benchmark test sample:</span>
-          {samples.map((s) => (
-            <button
-              key={s.label}
-              onClick={() => handleScanSample(s)}
+            <input
+              type="file"
+              accept="image/*,video/*,audio/*"
+              onChange={handleFileUpload}
               disabled={loading}
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.5rem 0.75rem',
-                backgroundColor: '#0F172A',
-                color: '#E2E8F0',
-                border: '1px solid #334155',
-                borderRadius: '0.375rem',
-                cursor: loading ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {s.label}
-            </button>
-          ))}
+              style={{ display: 'none' }}
+            />
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(2, 132, 199, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #0284C7' }}>
+              {loading ? <RefreshCw className="animate-spin" size={24} color="#38BDF8" /> : <Upload size={24} color="#38BDF8" />}
+            </div>
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#F8FAFC' }}>
+                {loading ? 'Analyzing Media for AI Tampering...' : 'Click or Tap to Upload Photo, Video, or Audio'}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                Supports photos (JPG, PNG), video clips (MP4, AVI), and audio recordings (WAV, MP3)
+              </div>
+            </div>
+            {selectedFilename && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#1E293B', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontSize: '0.8rem', color: '#38BDF8', border: '1px solid #334E68', marginTop: '0.25rem' }}>
+                <FileCheck size={14} />
+                <span>Selected: {selectedFilename}</span>
+              </div>
+            )}
+          </label>
         </div>
       </div>
 
       {error && (
-        <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', padding: '1rem', borderRadius: '0.5rem', color: '#FCA5A5' }}>
-          ⚠️ <strong>Forensic Error:</strong> {error}
+        <div style={{ padding: '1rem', backgroundColor: 'var(--color-danger-bg)', border: '1px solid var(--color-danger)', borderRadius: '0.5rem', color: '#FCA5A5', fontSize: '0.875rem' }}>
+          ⚠️ <strong>Analysis Error:</strong> {error}
         </div>
       )}
 
-      {/* Results Section */}
+      {/* Forensic Results: Clear Plain English & Direct Reporting Pathways */}
       {result && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-          {/* Main Verdict Summary */}
-          <div style={{ backgroundColor: 'var(--bg-card)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Assessed File</span>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'monospace' }}>{selectedFilename}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div
+            className="cyber-card"
+            style={{
+              padding: '1.5rem',
+              borderLeft: `5px solid ${isAuthentic ? '#10B981' : isDeepfake ? '#EF4444' : '#F59E0B'}`,
+              backgroundColor: isAuthentic ? 'rgba(16, 185, 129, 0.05)' : isDeepfake ? 'rgba(239, 68, 68, 0.06)' : 'rgba(245, 158, 11, 0.05)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: isAuthentic ? 'rgba(16, 185, 129, 0.2)' : isDeepfake ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                  border: `2px solid ${isAuthentic ? '#10B981' : isDeepfake ? '#EF4444' : '#F59E0B'}`
+                }}
+              >
+                {isAuthentic ? <ShieldCheck size={32} color="#34D399" /> : isDeepfake ? <ShieldAlert size={32} color="#F87171" /> : <AlertTriangle size={32} color="#FBBF24" />}
               </div>
-              <VerdictBadge verdict={result.verdict} />
-            </div>
-
-            <div style={{ padding: '0.75rem', backgroundColor: '#0B0F19', borderRadius: '0.5rem', border: '1px solid #1F2937', marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Forensic Verdict Note:</div>
-              <div style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>{result.verdict.explanation}</div>
-            </div>
-
-            {/* Invariant Note if Recompressed */}
-            {result.forensicSignals.recompressionDetected && (
-              <div className="hatched-unmeasured" style={{ padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#FBBF24', fontWeight: 700, fontSize: '0.85rem' }}>
-                  <AlertTriangle size={16} />
-                  Recompression Detected (Refusal to Certify)
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: isAuthentic ? '#34D399' : isDeepfake ? '#F87171' : '#FBBF24' }}>
+                  {isAuthentic ? '✓ Natural & Genuine Media' : isDeepfake ? '✗ AI Deepfake / Synthetic Tampering Detected!' : '⚠️ Inconclusive / Heavily Re-compressed File'}
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem' }}>
-                  Lossy recompression destroyed fine sensor noise residuals. TrustShield strictly reports UNKNOWN and warns the evaluator rather than calling it clean.
-                </p>
+                <div style={{ fontSize: '0.92rem', color: '#CBD5E1', marginTop: '0.35rem' }}>
+                  {isAuthentic
+                    ? 'This file exhibits authentic organic camera sensor noise and natural biometric acoustic flow. No signs of generative AI synthesis.'
+                    : isDeepfake
+                    ? 'This media shows telltale signs of AI facial synthesis, unnatural robotic pitch micro-tremors, or generative video editing. It is not authentic.'
+                    : 'The file has been repeatedly compressed or degraded over messaging apps. Treat this media with skepticism until verified by primary news sources.'}
+                </div>
+              </div>
+            </div>
+
+            {/* Reporting Guide for Common Users */}
+            {isDeepfake && (
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  📢 How to Report this Deepfake to Law Enforcement &amp; Authorities:
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+                  {/* Option 1: National Cyber Crime Portal */}
+                  <div style={{ backgroundColor: '#152238', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #263852', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontWeight: 800, color: '#F8FAFC', fontSize: '0.95rem' }}>
+                      1. National Cyber Crime Reporting Portal
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
+                      Official Government portal for cyber fraud, impersonation, and non-consensual deepfakes.
+                    </div>
+                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+                      <a
+                        href="https://cybercrime.gov.in"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#38BDF8', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}
+                      >
+                        Visit cybercrime.gov.in <ExternalLink size={14} />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Option 2: Cyber Crime Helpline */}
+                  <div style={{ backgroundColor: '#152238', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #263852', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontWeight: 800, color: '#F8FAFC', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <PhoneCall size={16} color="#34D399" /> 2. National Helpline: 1930
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
+                      Toll-free 24x7 cyber fraud and extortion emergency helpline run by the Ministry of Home Affairs (MHA).
+                    </div>
+                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', color: '#34D399', fontWeight: 800, fontSize: '0.85rem' }}>
+                      Dial 1930 immediately
+                    </div>
+                  </div>
+
+                  {/* Option 3: Social Media Platform Grievance Officer */}
+                  <div style={{ backgroundColor: '#152238', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #263852', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontWeight: 800, color: '#F8FAFC', fontSize: '0.95rem' }}>
+                      3. Report on Social Media Platform
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
+                      Under IT Rules, platforms must remove synthetic impersonations within 24–36 hours of user complaint. Use the in-app "Report" button &rarr; "Misleading / Deepfake".
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
-              <div style={{ padding: '0.5rem', backgroundColor: '#1E293B', borderRadius: '0.375rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Resolution:</span>
-                <div>{result.metadata.width} × {result.metadata.height}</div>
-              </div>
-              <div style={{ padding: '0.5rem', backgroundColor: '#1E293B', borderRadius: '0.375rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Format:</span>
-                <div>{result.metadata.format}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual Forensics Card */}
-          <div style={{ backgroundColor: 'var(--bg-card)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ImageIcon size={18} color="#F59E0B" />
-              Visual Forensics (6 Classical Signals)
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#0F172A', borderRadius: '0.375rem' }}>
-                <span>ELA Variance:</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{result.forensicSignals.elaVariance.toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#0F172A', borderRadius: '0.375rem' }}>
-                <span>DQT Table Anomaly:</span>
-                <span style={{ fontWeight: 700, color: result.forensicSignals.quantisationTableAnomalous ? '#EF4444' : '#10B981' }}>
-                  {result.forensicSignals.quantisationTableAnomalous ? 'ANOMALOUS (NON-STANDARD)' : 'STANDARD'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#0F172A', borderRadius: '0.375rem' }}>
-                <span>Spatial 8x8 Blockiness:</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{result.forensicSignals.spatialBlockinessScore.toFixed(3)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#0F172A', borderRadius: '0.375rem' }}>
-                <span>Noise Residual Variance:</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{result.forensicSignals.noiseResidualVariance.toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: '#0F172A', borderRadius: '0.375rem' }}>
-                <span>C2PA Manifest:</span>
-                <span style={{ fontWeight: 700, color: result.forensicSignals.c2paDetected ? '#10B981' : '#64748B' }}>
-                  {result.forensicSignals.c2paDetected ? 'AUTHENTIC CONTENT CREDENTIALS' : 'NOT PRESENT'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Multimodal Acoustic & Temporal Card */}
-          <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--bg-card)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid var(--border-color)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Volume2 size={18} color="#38BDF8" />
-              Multimodal Temporal Video & Acoustic Biophysics Forensics
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-              {/* Video metrics */}
-              <div style={{ padding: '0.75rem', backgroundColor: '#0F172A', borderRadius: '0.5rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38BDF8', marginBottom: '0.5rem' }}>
-                  Video ISO BMFF Temporal Analysis
-                </h4>
-                <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Analyzed:</span>
-                    <span>{result.videoSignals.videoAnalyzed ? 'YES' : 'NO'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Frame Count:</span>
-                    <span style={{ fontFamily: 'monospace' }}>{result.videoSignals.frameCount}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Temporal Jitter:</span>
-                    <span style={{ fontFamily: 'monospace' }}>{result.videoSignals.temporalJitterScore.toFixed(3)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Frame Consistency:</span>
-                    <span style={{ fontFamily: 'monospace' }}>{result.videoSignals.frameConsistencyScore.toFixed(3)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audio metrics */}
-              <div style={{ padding: '0.75rem', backgroundColor: '#0F172A', borderRadius: '0.5rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#A855F7', marginBottom: '0.5rem' }}>
-                  Acoustic Speech Forensics
-                </h4>
-                <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Analyzed:</span>
-                    <span>{result.audioSignals.audioAnalyzed ? 'YES' : 'NO'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Synthetic Voice Score:</span>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{result.audioSignals.syntheticVoiceScore.toFixed(2)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Spectral Roll-off:</span>
-                    <span>{result.audioSignals.spectralCutoffDetected ? 'SYNTHETIC CUTOFF' : 'NATURAL'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Robotic Pitch Micro-tremor:</span>
-                    <span style={{ fontFamily: 'monospace' }}>{result.audioSignals.roboticPitchScore.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       )}

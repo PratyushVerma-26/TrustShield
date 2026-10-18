@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="deepfakeDangerBg" cx="50%" cy="50%" r="85%">
+      <stop offset="0%" stop-color="#550808" />
+      <stop offset="60%" stop-color="#240202" />
+      <stop offset="100%" stop-color="#0c0000" />
+    </radialGradient>
+    <filter id="dangerGlow">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#deepfakeDangerBg)" />
+
+  <!-- Huge Enlarged Monitor Screen Dead Center -->
+  <g transform="translate(960, 520)">
+    <!-- Monitor Stand -->
+    <rect x="-50" y="270" width="100" height="90" fill="#334155" rx="6" />
+    <ellipse cx="0" cy="360" rx="150" ry="30" fill="#1e293b" />
+
+    <!-- Monitor Bezel Glowing Red Hazard -->
+    <rect x="-420" y="-270" width="840" height="540" rx="24" fill="#450a0a" stroke="#ef4444" stroke-width="5" filter="url(#dangerGlow)" />
+    <!-- Display Panel -->
+    <rect x="-390" y="-240" width="780" height="480" rx="14" fill="#1f0404" />
+
+    <!-- Incoming Media Transfer Window -->
+    <rect x="-340" y="-200" width="680" height="110" rx="16" fill="#7f1d1d" stroke="#fca5a5" stroke-width="3" />
+    <text x="-300" y="-132" font-family="sans-serif" font-size="44">🤖</text>
+    <text x="-230" y="-150" font-family="JetBrains Mono, monospace" font-size="22" fill="#fee2e2" font-weight="900">
+      Inspected Media: viral_video_forward.mp4
+    </text>
+    <text x="-230" y="-118" font-family="sans-serif" font-size="16" fill="#fca5a5">
+      Synthetic Face Swapping Artifacts &amp; AI Voice Cloning Detected
+    </text>
+
+    <!-- QUESTION MARK TURNS INTO A BIG RED FAKE X -->
+    <g transform="translate(0, 50)">
+      <circle cx="0" cy="0" r="85" fill="rgba(239, 68, 68, 0.25)" stroke="#ef4444" stroke-width="4.5" />
+      <path d="M -32 -32 L 32 32 M 32 -32 L -32 32" stroke="#ef4444" stroke-width="16" stroke-linecap="round" />
+    </g>
+
+    <text x="0" y="195" font-family="sans-serif" font-size="22" fill="#f87171" font-weight="900" text-anchor="middle" letter-spacing="1">
+      ✗ SYNTHETIC AI DEEPFAKE DETECTED!
+    </text>
+  </g>
+</svg>
